@@ -45,28 +45,27 @@ function grow() {
     'images/basil6.jpg': 'Basil Day 60',
   };
   const image = document.getElementById('basil');
-  var imgIndex = 1;
-  const imgScr = `images/basil${imgIndex}.jpg`;
   console.log(`Let's grow some basil`);
 
-  // Recursive call
-  function someTimeLater() {
-    setTimeout(function() {
+  // Recursively update images every second
+  function someTimeLater(imgIndex) {
+    setTimeout(function () {
       console.log('Some time has passed ...');
       // Change the image
-      imgSrc = 'images/basil' + imgIndex + '.jpg';
+      const imgSrc = `images/basil${imgIndex}.jpg`;
       image.src = imgSrc;
       image.alt = srcToAlt[imgSrc];
       image.width = '400';
       image.height = '400';
       imgIndex++;
       if (imgIndex <= 6) {
-        someTimeLater(); // Keep growing
+        someTimeLater(imgIndex); // Keep growing
       } else {
-        alert(`This's the latest photo I have! The basil will keep growing ...`);
+        console.log(`This's the latest photo I have! The basil will keep growing ...`);
       }
     }, 1000); // Update the image every 1000 ms = 1 sec
   }
 
-  someTimeLater();
+  // Start with imgIndex=1
+  someTimeLater(1);
 }
