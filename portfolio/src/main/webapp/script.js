@@ -30,7 +30,7 @@ function findZoe() {
   const location = locations[Math.floor(Math.random() * locations.length)];
 
   // Add it to the page.
-  const linkContainer = document.getElementById("link");
-  linkContainer.innerText = location;
-  linkContainer.href = locationToLink[location];
+  const link = document.getElementById("link");
+  link.innerText = location;
+  link.href = locationToLink[location];
 }
