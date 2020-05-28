@@ -26,7 +26,7 @@ function findZoe() {
   };
 
   // Pick a random location.
-  var locations = Object.keys(locationToLink);
+  const locations = Object.keys(locationToLink);
   const location = locations[Math.floor(Math.random() * locations.length)];
 
   // Add it to the page.
