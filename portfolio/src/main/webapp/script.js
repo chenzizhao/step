@@ -15,14 +15,22 @@
 /**
  * Adds a random greeting to the page.
  */
-function addRandomGreeting() {
-  const greetings =
-      ['Hello world!', '¡Hola Mundo!', '你好，世界！', 'Bonjour le monde!'];
+function findZoe() {
+  const locationToLink = {
+    '43.5˚N, 79.4˚W':
+      `https://www.google.com/maps/place/43%C2%B030'00.0%22N+79%C2%B024'00.0%22W/`,
+    'a very very dark place': 'https://ssh.cloud.google.com/cloudshell',
+    'github': 'https://github.com/chenzizhao',
+    'linkedin': 'https://www.linkedin.com/in/chenzizhao/',
+    'the pit': 'https://skulepedia.ca/wiki/Sandford_Fleming_Atrium',
+  };
 
-  // Pick a random greeting.
-  const greeting = greetings[Math.floor(Math.random() * greetings.length)];
+  // Pick a random location.
+  const locations = Object.keys(locationToLink);
+  const location = locations[Math.floor(Math.random() * locations.length)];
 
   // Add it to the page.
-  const greetingContainer = document.getElementById('greeting-container');
-  greetingContainer.innerText = greeting;
+  const link = document.getElementById("link");
+  link.innerText = location;
+  link.href = locationToLink[location];
 }
