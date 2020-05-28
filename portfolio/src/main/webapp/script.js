@@ -46,7 +46,7 @@ function grow() {
   };
   const image = document.getElementById('basil');
   var imgIndex = 1;
-  var imgSrc = 'images/basil' + imgIndex + '.jpg';
+  const imgScr = `images/basil${imgIndex}.jpg`;
   console.log(`Let's grow some basil`);
 
   // Recursive call
