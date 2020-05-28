@@ -34,3 +34,39 @@ function findZoe() {
   linkContainer.innerText = location;
   linkContainer.href = locationToLink[location];
 }
+
+function grow() {
+  const imageToAlt = {
+    "images/basil1.jpg": "Basil Day 0",
+    "images/basil2.jpg": "Basil Day 10",
+    "images/basil3.jpg": "Basil Day 20",
+    "images/basil4.jpg": "Basil Day 30",
+    "images/basil5.jpg": "Basil Day 40",
+    "images/basil6.jpg": "Basil Day 60"
+  };
+  const imgContainer = document.getElementById("basil");
+  var imgIndex = 1;
+  var image = "images/basil" + imgIndex + ".jpg";
+  console.log("Let's grow some basil");
+
+  // Recursive
+  function someTimeLater() {
+    setTimeout(function() {
+      console.log("Some time has passed ...");
+      // Change the image
+      image = "images/basil" + imgIndex + ".jpg";
+      imgContainer.src = image;
+      imgContainer.alt = imageToAlt[image];
+      imgContainer.width = "400";
+      imgContainer.height = "400";
+      imgIndex++;
+      if (imgIndex <= 6) {
+        someTimeLater(); // Keep growing
+      } else {
+        console.log("That's it for now!");
+      }
+    }, 1000); // Update the image every 1000 ms = 1 sec
+  }
+
+  someTimeLater();
+}
