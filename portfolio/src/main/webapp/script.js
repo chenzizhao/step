@@ -46,25 +46,19 @@ function grow() {
   };
   const image = document.getElementById('basil');
   console.log(`Let's grow some basil`);
-
-  function updateImagePerSec(imgIndex) {
-    setTimeout(function () {
-      console.log('Some time has passed ...');
-      // Change the image
-      const imgSrc = `images/basil${imgIndex}.jpg`;
-      image.src = imgSrc;
-      image.alt = srcToAlt[imgSrc];
-      image.width = '400';
-      image.height = '400';
-      imgIndex++;
-      if (imgIndex <= 6) {
-        updateImagePerSec(imgIndex); // Keep growing
-      } else {
-        console.log(`This's the latest photo I have! The basil will keep growing ...`);
-      }
-    }, 1000); // Update the image every 1000 ms = 1 sec
+  
+  for (let imgIndex = 1; imgIndex <= 6; imgIndex++) {
+    updateImg(imgIndex);
   }
 
-  // Start with imgIndex=1
-  someTimeLater(1);
+  function updateImg(imgIndex) {
+    setTimeout(
+      function () {
+        const imgSrc = `images/basil${imgIndex}.jpg`;
+        image.src = imgSrc;
+        image.alt = srcToAlt[imgSrc];
+        image.width = '400';
+        image.height = '400';
+      }, 1000 * imgIndex);
+  }
 }
