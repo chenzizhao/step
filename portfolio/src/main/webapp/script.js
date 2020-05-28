@@ -47,8 +47,7 @@ function grow() {
   const image = document.getElementById('basil');
   console.log(`Let's grow some basil`);
 
-  // Recursively update images every second
-  function someTimeLater(imgIndex) {
+  function updateImagePerSec(imgIndex) {
     setTimeout(function () {
       console.log('Some time has passed ...');
       // Change the image
@@ -59,7 +58,7 @@ function grow() {
       image.height = '400';
       imgIndex++;
       if (imgIndex <= 6) {
-        someTimeLater(imgIndex); // Keep growing
+        updateImagePerSec(imgIndex); // Keep growing
       } else {
         console.log(`This's the latest photo I have! The basil will keep growing ...`);
       }
