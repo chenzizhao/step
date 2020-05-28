@@ -17,12 +17,12 @@
  */
 function findZoe() {
   const locationToLink = {
-    "43.5˚N, 79.4˚W":
-      "https://www.google.com/maps/place/43%C2%B030'00.0%22N+79%C2%B024'00.0%22W/",
-    "a very very dark place": "https://ssh.cloud.google.com/cloudshell",
-    "github": "https://github.com/chenzizhao",
-    "linkedin": "https://www.linkedin.com/in/chenzizhao/",
-    "the pit": "https://skulepedia.ca/wiki/Sandford_Fleming_Atrium"
+    '43.5˚N, 79.4˚W':
+      `https://www.google.com/maps/place/43%C2%B030'00.0%22N+79%C2%B024'00.0%22W/`,
+    'a very very dark place': 'https://ssh.cloud.google.com/cloudshell',
+    'github': 'https://github.com/chenzizhao',
+    'linkedin': 'https://www.linkedin.com/in/chenzizhao/',
+    'the pit': 'https://skulepedia.ca/wiki/Sandford_Fleming_Atrium',
   };
 
   // Pick a random location.
@@ -30,9 +30,9 @@ function findZoe() {
   const location = locations[Math.floor(Math.random() * locations.length)];
 
   // Add it to the page.
-  const linkContainer = document.getElementById("link");
-  linkContainer.innerText = location;
-  linkContainer.href = locationToLink[location];
+  const link = document.getElementById("link");
+  link.innerText = location;
+  link.href = locationToLink[location];
 }
 
 function grow() {
