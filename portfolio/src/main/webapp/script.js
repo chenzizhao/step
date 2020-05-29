@@ -66,5 +66,5 @@ function grow() {
   }
 
   // Start with imgIndex=1
-  someTimeLater(1);
+  updateImagePerSec(1);
 }
