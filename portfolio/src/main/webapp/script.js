@@ -55,7 +55,5 @@ function grow() {
     const imgSrc = `images/basil${imgIndex}.jpg`;
     image.src = imgSrc;
     image.alt = srcToAlt[imgSrc];
-    image.width = '400';
-    image.height = '400';
   }
 }
