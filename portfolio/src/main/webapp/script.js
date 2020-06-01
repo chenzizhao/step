@@ -57,7 +57,7 @@ function grow() {
     const imgSrc = `images/basil${imgIndex}.jpg`;
     image.src = imgSrc;
     image.alt = srcToAlt[imgSrc];
-    if (imgIndex === 6) {
+    if (imgIndex >= Object.keys(srcToAlt).length) {
       endMsg.innerText = `That's all the photos I have for now!`;
     }
   }
