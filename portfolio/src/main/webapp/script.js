@@ -45,8 +45,10 @@ function grow() {
     'images/basil6.jpg': 'Basil Day 60',
   };
   const image = document.getElementById('basil');
+  const endMsg = document.getElementById('endMsg');
   console.log(`Let's grow some basil`);
-  
+  endMsg.innerHTML = '';
+
   for (let imgIndex = 1; imgIndex <= 6; imgIndex++) {
     setTimeout(() => updateImg(imgIndex), 1000 * imgIndex)
   }
@@ -55,5 +57,8 @@ function grow() {
     const imgSrc = `images/basil${imgIndex}.jpg`;
     image.src = imgSrc;
     image.alt = srcToAlt[imgSrc];
+    if (imgIndex === 6) {
+      endMsg.innerText = `That's all the photos I have for now!`;
+    }
   }
 }
