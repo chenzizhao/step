@@ -47,6 +47,7 @@ function grow() {
   const image = document.getElementById('basil');
   const endMsg = document.getElementById('endMsg');
   console.log(`Let's grow some basil`);
+  // Clear text from the previous round of slideshow.
   endMsg.innerHTML = '';
 
   for (let imgIndex = 1; imgIndex <= 6; imgIndex++) {
