@@ -30,7 +30,36 @@ function findZoe() {
   const location = locations[Math.floor(Math.random() * locations.length)];
 
   // Add it to the page.
-  const link = document.getElementById("link");
+  const link = document.getElementById('link');
   link.innerText = location;
   link.href = locationToLink[location];
+}
+
+function grow() {
+  const srcToAlt = {
+    'images/basil1.jpg': 'Basil Day 0',
+    'images/basil2.jpg': 'Basil Day 10',
+    'images/basil3.jpg': 'Basil Day 20',
+    'images/basil4.jpg': 'Basil Day 30',
+    'images/basil5.jpg': 'Basil Day 40',
+    'images/basil6.jpg': 'Basil Day 60',
+  };
+  const image = document.getElementById('basil');
+  const endMsg = document.getElementById('endMsg');
+  console.log(`Let's grow some basil`);
+  // Clear text from the previous round of slideshow.
+  endMsg.innerText = '';
+
+  for (let imgIndex = 1; imgIndex <= 6; imgIndex++) {
+    setTimeout(() => updateImg(imgIndex), 1000 * imgIndex)
+  }
+
+  function updateImg(imgIndex) {
+    const imgSrc = `images/basil${imgIndex}.jpg`;
+    image.src = imgSrc;
+    image.alt = srcToAlt[imgSrc];
+    if (imgIndex >= Object.keys(srcToAlt).length) {
+      endMsg.innerText = `That's all the photos I have for now!`;
+    }
+  }
 }
