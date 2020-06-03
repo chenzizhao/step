@@ -66,7 +66,6 @@ function grow() {
 
 function getComments() {
   fetch('/data').then(response => response.json()).then(comments => {
-    console.log(comments);
     const commentsContainer = document.getElementById('comments-container');
     for (const comment of comments){
       const commentElement = document.createElement('li');
