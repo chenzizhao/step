@@ -65,7 +65,15 @@ function grow() {
 }
 
 function getGreeting() {
-  fetch('/data').then(response => response.text()).then(greeting => {
-    document.getElementById('greeting-container').innerHTML = greeting;
+  fetch('/data').then(response => response.json()).then(greetingsJson => {
+    console.log(greetingsJson);
+    const greetingsElement = document.getElementById('greetings-container');
+    var greeting;
+    var greetingElement;
+    for (greeting of greetingsJson){
+      greetingElement = document.createElement('li');
+      greetingElement.innerText = greeting;
+      greetingsElement.appendChild(greetingElement);    
+    }
   });
 }
