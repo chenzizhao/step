@@ -63,3 +63,9 @@ function grow() {
     }
   }
 }
+
+function getGreeting() {
+  fetch('/data').then(response => response.text()).then(greeting => {
+    document.getElementById('greeting-container').innerHTML = greeting;
+  });
+}
