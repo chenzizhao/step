@@ -64,10 +64,10 @@ function grow() {
   }
 }
 
-function getGreeting() {
+function getComments() {
   fetch('/data').then(response => response.json()).then(comments => {
     console.log(comments);
-    const commentsContainer = document.getElementById('greetings-container');
+    const commentsContainer = document.getElementById('comments-container');
     var comment;
     var commentElement;
     for (comment of comments){
