@@ -68,12 +68,10 @@ function getComments() {
   fetch('/data').then(response => response.json()).then(comments => {
     console.log(comments);
     const commentsContainer = document.getElementById('comments-container');
-    var comment;
-    var commentElement;
-    for (comment of comments){
-      commentElement = document.createElement('li');
+    for (const comment of comments){
+      const commentElement = document.createElement('li');
       commentElement.innerText = comment;
-      commentsContainer.appendChild(commentElement);    
+      commentsContainer.appendChild(commentElement);
     }
   });
 }
