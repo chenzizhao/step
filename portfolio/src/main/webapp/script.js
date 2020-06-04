@@ -64,8 +64,13 @@ function grow() {
   }
 }
 
-function getGreeting() {
-  fetch('/data').then(response => response.text()).then(greeting => {
-    document.getElementById('greeting-container').innerHTML = greeting;
+function getComments() {
+  fetch('/data').then(response => response.json()).then(comments => {
+    const commentsContainer = document.getElementById('comments-container');
+    for (const comment of comments){
+      const commentElement = document.createElement('li');
+      commentElement.innerText = comment;
+      commentsContainer.appendChild(commentElement);
+    }
   });
 }
