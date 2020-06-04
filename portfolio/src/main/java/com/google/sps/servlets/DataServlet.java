@@ -15,6 +15,12 @@
 package com.google.sps.servlets;
 
 import com.google.gson.Gson;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.SortDirection;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.servlet.annotation.WebServlet;
@@ -25,11 +31,18 @@ import javax.servlet.http.HttpServletResponse;
 /** Servlet that returns some example content. TODO: modify this file to handle comments data */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
-  private ArrayList<String> comments = new ArrayList<String>();
+  private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
   
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    String json = new Gson().toJson(this.comments);
+    ArrayList<String> comments = new ArrayList<>();
+    Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
+    PreparedQuery results = this.datastore.prepare(query);
+    for (Entity entity : results.asIterable()) {
+      comments.add((String) entity.getProperty("content"));
+    }
+
+    String json = new Gson().toJson(comments);
     response.setContentType("application/json;");
     response.getWriter().println(json);
   }
@@ -37,12 +50,17 @@ public class DataServlet extends HttpServlet {
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     String newComment = request.getParameter("new-comment");
+    long timestamp = System.currentTimeMillis();
+
     if (newComment.isEmpty()){
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
     }
     else{
-      this.comments.add(newComment);
-      response.sendRedirect("/index.html");  
+      Entity commentEntity = new Entity("Comment");
+      commentEntity.setProperty("content", newComment);
+      commentEntity.setProperty("timestamp", timestamp);
+      this.datastore.put(commentEntity);
+      response.sendRedirect("/index.html");
     }
   }
 }
