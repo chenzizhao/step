@@ -37,9 +37,12 @@ public class DataServlet extends HttpServlet {
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     String newComment = request.getParameter("new-comment");
-    if (!newComment.isEmpty()){
-      this.comments.add(newComment);
+    if (newComment.isEmpty()){
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST);
     }
-    response.sendRedirect("/index.html");
+    else{
+      this.comments.add(newComment);
+      response.sendRedirect("/index.html");  
+    }
   }
 }
