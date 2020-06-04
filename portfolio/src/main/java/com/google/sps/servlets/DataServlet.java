@@ -23,7 +23,6 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -37,7 +36,7 @@ public class DataServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     ArrayList<String> comments = new ArrayList<>();
-    Query query = new Query("Comment");
+    Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
     PreparedQuery results = this.datastore.prepare(query);
     for (Entity entity : results.asIterable()) {
       comments.add((String) entity.getProperty("content"));
@@ -51,11 +50,17 @@ public class DataServlet extends HttpServlet {
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     String newComment = request.getParameter("new-comment");
-    if (!newComment.isEmpty()){
+    long timestamp = System.currentTimeMillis();
+
+    if (newComment.isEmpty()){
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+    }
+    else{
       Entity commentEntity = new Entity("Comment");
       commentEntity.setProperty("content", newComment);
+      commentEntity.setProperty("timestamp", timestamp);
       this.datastore.put(commentEntity);
+      response.sendRedirect("/index.html");
     }
-    response.sendRedirect("/index.html");
   }
 }
