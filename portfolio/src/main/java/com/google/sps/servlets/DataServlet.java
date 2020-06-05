@@ -38,15 +38,16 @@ public class DataServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     int limit = 3;
+    String ERR_MSG = "Comment limit must be a non-negative integer.";
     try {
       limit = Integer.parseInt(request.getParameter("limit"));
     }
     catch(NumberFormatException e){
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST,"Comment limit must be an integer.");
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, ERR_MSG);
       return;
     }
     if (limit<0){
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Comment limit must be a non-negative integer");
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, ERR_MSG);
       return;
     }
 
@@ -67,8 +68,9 @@ public class DataServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     String newComment = request.getParameter("new-comment");
     long timestamp = System.currentTimeMillis();
+    System.out.println("new comment received: "+newComment);
 
-    if (newComment.isEmpty()){
+    if (newComment == null || newComment.isEmpty()){
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Comment must be a non-empty string.");
       return;
     }
@@ -76,6 +78,5 @@ public class DataServlet extends HttpServlet {
     commentEntity.setProperty("content", newComment);
     commentEntity.setProperty("timestamp", timestamp);
     this.datastore.put(commentEntity);
-    response.sendRedirect("/index.html");
   }
 }
