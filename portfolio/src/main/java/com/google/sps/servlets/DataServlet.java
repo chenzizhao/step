@@ -37,10 +37,17 @@ public class DataServlet extends HttpServlet {
   
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    String limitStr = request.getParameter("limit");
+    int limit = 3; // Default number of comments shown. 
+    if (limitStr!=null && limitStr!=""){
+      limit = Integer.parseInt(limitStr);
+    }
+    // TODO there should be a better way of writing this ^
+    
     Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
     PreparedQuery pq = this.datastore.prepare(query);
 
-    List<String> comments = pq.asList(FetchOptions.Builder.withLimit(3))
+    List<String> comments = pq.asList(FetchOptions.Builder.withLimit(limit))
       .stream()
       .map(entity->(String) entity.getProperty("content"))
       .collect(Collectors.toList());
