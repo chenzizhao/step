@@ -32,15 +32,14 @@
     <br>
     <h2>Comments</h2>
     <form action="/data" method="POST">
-      <p>Add a new comment: </p>
+      <label>Leave a comment </label>
       <input type="text" id="new-comment" name="new-comment">
       <input type="submit">
     </form>
-    <form action="/limit" method="POST">
-      <p>Limit the number of comments shown to: (between 1 and 100)</p>      
-      <input type="number" id="limit" name="quantity" min="1" max="100" placeholder="3">
-      <button type="button" onclick="getComments()">Refresh</button>
-    </form>
+    <br>
+    <label>Display the latest comments (between 1 and 100)</label>      
+    <input type="number" id="limit" name="quantity" min="1" max="100" placeholder="3">
+    <button type="button" onclick="getComments()">Refresh</button>
     <ul id="comments-container"></ul>
 </body>
 
