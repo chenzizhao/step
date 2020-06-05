@@ -37,12 +37,12 @@ public class DataServlet extends HttpServlet {
   
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    int limit;
-    try {
-      limit = Integer.parseInt(request.getParameter("limit"));
+    int limit = 3;
+    try {
+      limit = Integer.parseInt(request.getParameter("limit"));
     }
-    catch(NumberFormatException e){
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Comment limit must be an integer.");
+    catch(NumberFormatException e){
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST,"Comment limit must be an integer.");
       return;
     }
     if (limit<0){
