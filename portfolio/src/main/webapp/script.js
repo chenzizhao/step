@@ -72,7 +72,7 @@ function getComments() {
   }
   // Read user input, show 3 comments in default
   var limit = document.getElementById("limit").value;
-  if (limit==null || limit==""){
+  if (limit==null || limit===""){
     limit="3";
   }
   
