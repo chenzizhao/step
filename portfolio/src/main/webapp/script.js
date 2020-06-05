@@ -66,22 +66,23 @@ function grow() {
 
 function getComments() {
   const commentsContainer = document.getElementById('comments-container');
-  // Clear all comments
+  // Clear all old comments
   while (commentsContainer.firstChild) {
     commentsContainer.firstChild.remove();
   }
-  // Read user input, set default to be 3 comments
+  // Read user input, show 3 comments in default
   var limit = document.getElementById("limit").value;
   if (limit==null || limit==""){
     limit="3";
   }
-  const url = `/data?limit=${limit}`;
   
-  fetch(url).then(response => response.json()).then(comments => {
-    for (const comment of comments){
-      const commentElement = document.createElement('li');
-      commentElement.innerText = comment;
-      commentsContainer.appendChild(commentElement);
-    }
-  });
+  fetch(`/data?limit=${limit}`)
+    .then(response => response.json())
+    .then(comments => {
+      for (const comment of comments){
+        const commentElement = document.createElement('li');
+        commentElement.innerText = comment;
+        commentsContainer.appendChild(commentElement);
+      }
+    });
 }
