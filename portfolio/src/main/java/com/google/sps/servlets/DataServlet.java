@@ -37,8 +37,18 @@ public class DataServlet extends HttpServlet {
   
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    // Integer guaranteed in script.js
-    int limit = Integer.parseInt(request.getParameter("limit"));
+    int limit;
+    try {
+      limit = Integer.parseInt(request.getParameter("limit"));
+    }
+    catch(NumberFormatException e){
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Comment limit must be an integer.");
+      return;
+    }
+    if (limit<0){
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Comment limit must be a non-negative integer");
+      return;
+    }
 
     Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
     PreparedQuery pq = this.datastore.prepare(query);
