@@ -65,7 +65,8 @@ function grow() {
 }
 
 function getComments() {
-  fetch('/data').then(response => response.json()).then(comments => {
+  const limit=document.getElementById("limit").value;
+  fetch(`/data?limit=${limit}`).then(response => response.json()).then(comments => {
     const commentsContainer = document.getElementById('comments-container');
     for (const comment of comments){
       const commentElement = document.createElement('li');

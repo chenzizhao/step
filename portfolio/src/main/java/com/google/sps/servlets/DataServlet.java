@@ -43,7 +43,7 @@ public class DataServlet extends HttpServlet {
       limit = Integer.parseInt(limitStr);
     }
     // TODO there should be a better way of writing this ^
-    
+
     Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
     PreparedQuery pq = this.datastore.prepare(query);
 
