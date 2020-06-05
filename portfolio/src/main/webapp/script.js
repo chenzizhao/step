@@ -82,7 +82,14 @@ function getComments() {
       }
     });
 }
+
 function deleteComments() {
   const request = new Request('/delete-data', {method: 'POST'});
+  fetch(request).then(()=>getComments());
+}
+
+function submitComment() {
+  const newComment = document.getElementById('new-comment').value;
+  const request = new Request(`/data?new-comment=${newComment}`, {method:'POST'});
   fetch(request).then(()=>getComments());
 }

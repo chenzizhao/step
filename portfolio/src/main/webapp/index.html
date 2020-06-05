@@ -30,19 +30,21 @@
     <p id="endMsg"></p>
     <br>
     <h2>Comments</h2>
-    <form action="/data" method="POST">
+    <form>
       <label>Leave a comment </label>
       <input type="text" id="new-comment" name="new-comment">
-      <input type="submit">
+      <button type="button" onclick="submitComment()">Submit</button>  
     </form>
     <br>
-    <label>Display the latest comments </label>
-    <select name="limit" id="limit">
-      <option value="3" selected="selected">3</option>
-      <option value="10">10</option>
-      <option value="20">20</option>
-    </select>
-    <button type="button" onclick="getComments()">Refresh</button>    
+    <form>
+      <label>Display the latest comments </label>
+      <select name="limit" id="limit">
+        <option value="3" selected="selected">3</option>
+        <option value="10">10</option>
+        <option value="20">20</option>
+      </select>
+      <button type="button" onclick="getComments()">Refresh</button>  
+    </form>  
     <ul id="comments-container"></ul>
     <button type="button" onclick="deleteComments()">Delete comments</button>    
 </body>
