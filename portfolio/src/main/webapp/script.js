@@ -70,8 +70,7 @@ function getComments() {
   while (commentsContainer.firstChild) {
     commentsContainer.firstChild.remove();
   }
-  // Read user input, show 3 comments in default
-  var limit = document.getElementById("limit").value;
+  const limit = document.getElementById("limit").value;
   
   fetch(`/data?limit=${limit}`)
     .then(response => response.json())
