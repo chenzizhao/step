@@ -37,6 +37,7 @@ public class DataServlet extends HttpServlet {
   
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    // Integer guaranteed in script.js
     int limit = Integer.parseInt(request.getParameter("limit"));
 
     Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
@@ -59,13 +60,12 @@ public class DataServlet extends HttpServlet {
 
     if (newComment.isEmpty()){
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+      return;
     }
-    else{
-      Entity commentEntity = new Entity("Comment");
-      commentEntity.setProperty("content", newComment);
-      commentEntity.setProperty("timestamp", timestamp);
-      this.datastore.put(commentEntity);
-      response.sendRedirect("/index.html");
-    }
+    Entity commentEntity = new Entity("Comment");
+    commentEntity.setProperty("content", newComment);
+    commentEntity.setProperty("timestamp", timestamp);
+    this.datastore.put(commentEntity);
+    response.sendRedirect("/index.html");
   }
 }
