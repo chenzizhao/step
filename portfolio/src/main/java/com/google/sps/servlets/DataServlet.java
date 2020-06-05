@@ -69,7 +69,7 @@ public class DataServlet extends HttpServlet {
     long timestamp = System.currentTimeMillis();
 
     if (newComment.isEmpty()){
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Comment must be a non-empty string.");
       return;
     }
     Entity commentEntity = new Entity("Comment");
