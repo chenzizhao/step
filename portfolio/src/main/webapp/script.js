@@ -65,9 +65,19 @@ function grow() {
 }
 
 function getComments() {
-  const limit=document.getElementById("limit").value;
-  fetch(`/data?limit=${limit}`).then(response => response.json()).then(comments => {
-    const commentsContainer = document.getElementById('comments-container');
+  const commentsContainer = document.getElementById('comments-container');
+  // Clear all comments
+  while (commentsContainer.firstChild) {
+    commentsContainer.firstChild.remove();
+  }
+  // Read user input, set default to be 3 comments
+  var limit = document.getElementById("limit").value;
+  if (limit==null || limit==""){
+    limit="3";
+  }
+  const url = `/data?limit=${limit}`;
+  
+  fetch(url).then(response => response.json()).then(comments => {
     for (const comment of comments){
       const commentElement = document.createElement('li');
       commentElement.innerText = comment;
