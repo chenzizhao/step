@@ -37,9 +37,13 @@
       <input type="submit">
     </form>
     <br>
-    <label>Display the latest comments (between 1 and 100)</label>      
-    <input type="number" id="limit" name="quantity" min="1" max="100" placeholder="3">
-    <button type="button" onclick="getComments()">Refresh</button>
+    <label>Display the latest comments </label>
+    <select name="limit" id="limit">
+      <option value="3" selected="selected">3</option>
+      <option value="10">10</option>
+      <option value="20">20</option>
+    </select>
+    <button type="button" onclick="getComments()">Refresh</button>    
     <ul id="comments-container"></ul>
 </body>
 
