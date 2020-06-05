@@ -14,16 +14,12 @@
 
 package com.google.sps.servlets;
 
-import com.google.gson.Gson;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -34,23 +30,10 @@ import javax.servlet.http.HttpServletResponse;
 public class DeleteDataServlet extends HttpServlet {
   private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
   
-  // @Override
-  // public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-  //   // Integer guaranteed in script.js
-  //   int limit = Integer.parseInt(request.getParameter("limit"));
-
-  //   Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
-  //   PreparedQuery pq = this.datastore.prepare(query);
-
-  //   List<String> comments = pq.asList(FetchOptions.Builder.withLimit(limit))
-  //     .stream()
-  //     .map(entity->(String) entity.getProperty("content"))
-  //     .collect(Collectors.toList());
-    
-  //   String json = new Gson().toJson(comments);
-  //   response.setContentType("application/json;");
-  //   response.getWriter().println(json);
-  // }
+  @Override
+  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    this.doPost(request, response);
+  }
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -59,6 +42,5 @@ public class DeleteDataServlet extends HttpServlet {
     for (Entity entity : pq.asIterable()){
       this.datastore.delete(entity.getKey());
     }
-    return;
   }
 }
