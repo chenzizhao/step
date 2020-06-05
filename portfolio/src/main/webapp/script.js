@@ -85,7 +85,6 @@ function getComments() {
 
 function submitComment(){
   const newComment = document.getElementById('new-comment').value;
-  console.log("get new element: "+newComment);
   const request = new Request(`/data?new-comment=${newComment}`, {method:'POST'});
   fetch(request).then(()=>getComments());
 }

@@ -68,12 +68,12 @@ public class DataServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     String newComment = request.getParameter("new-comment");
     long timestamp = System.currentTimeMillis();
-    System.out.println("new comment received: "+newComment);
 
     if (newComment == null || newComment.isEmpty()){
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Comment must be a non-empty string.");
       return;
     }
+    
     Entity commentEntity = new Entity("Comment");
     commentEntity.setProperty("content", newComment);
     commentEntity.setProperty("timestamp", timestamp);
