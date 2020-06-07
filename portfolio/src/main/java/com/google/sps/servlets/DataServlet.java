@@ -34,11 +34,11 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
   private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-  
+  static final private String ERR_MSG = "Comment limit must be a non-negative integer.";
+
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     int limit = 3;
-    String ERR_MSG = "Comment limit must be a non-negative integer.";
     try {
       limit = Integer.parseInt(request.getParameter("limit"));
     }
