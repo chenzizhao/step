@@ -35,6 +35,8 @@ import javax.servlet.http.HttpServletResponse;
 public class DataServlet extends HttpServlet {
   private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
   static final private String ERR_MSG = "Comment limit must be a non-negative integer.";
+  static final private int MAX_NUM_COMMENTS = 999999;
+  static private int num_comments = 0;
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -66,6 +68,11 @@ public class DataServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    if (this.num_comments>=this.MAX_NUM_COMMENTS){
+      response.sendError(HttpServletResponse.SC_CONFLICT, "Exceeds maximum number of comments.");
+      return;
+    }
+    
     String newComment = request.getParameter("new-comment");
     long timestamp = System.currentTimeMillis();
 
@@ -78,5 +85,6 @@ public class DataServlet extends HttpServlet {
     commentEntity.setProperty("content", newComment);
     commentEntity.setProperty("timestamp", timestamp);
     this.datastore.put(commentEntity);
+    this.num_comments+=1;
   }
 }
