@@ -34,11 +34,14 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
   private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-  
+  static final private String ERR_MSG = 
+    "Comment limit must be a non-negative integer, and do not exceed the maximum.";
+  static final private int MAX_LIMIT_COMMENTS = 50;
+  static final private int MAX_CHAR_PER_COMMENT = 280;
+
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     int limit = 3;
-    String ERR_MSG = "Comment limit must be a non-negative integer.";
     try {
       limit = Integer.parseInt(request.getParameter("limit"));
     }
@@ -47,6 +50,10 @@ public class DataServlet extends HttpServlet {
       return;
     }
     if (limit<0){
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, ERR_MSG);
+      return;
+    }
+    if (limit>this.MAX_LIMIT_COMMENTS){
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, ERR_MSG);
       return;
     }
@@ -65,14 +72,18 @@ public class DataServlet extends HttpServlet {
   }
 
   @Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {    
     String newComment = request.getParameter("new-comment");
-    long timestamp = System.currentTimeMillis();
-
     if (newComment == null || newComment.isEmpty()){
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Comment must be a non-empty string.");
       return;
     }
+
+    if (newComment.length() > this.MAX_CHAR_PER_COMMENT){
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Comment is too long.");
+      return;
+    }
+    long timestamp = System.currentTimeMillis();
     
     Entity commentEntity = new Entity("Comment");
     commentEntity.setProperty("content", newComment);
