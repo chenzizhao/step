@@ -34,10 +34,10 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
   private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-  static final private String ERR_MSG = 
-    "Comment limit must be a non-negative integer, and do not exceed the maximum.";
-  static final private int MAX_LIMIT_COMMENTS = 50;
-  static final private int MAX_CHAR_PER_COMMENT = 280;
+  final private int MAX_LIMIT_COMMENTS = 50;
+  final private int MAX_CHAR_PER_COMMENT = 280;
+  final private String ERR_MSG = 
+    String.format("Comment limit must be a non-negative integer, and do not exceed %d.", this.MAX_LIMIT_COMMENTS);
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -82,7 +82,8 @@ public class DataServlet extends HttpServlet {
     }
 
     if (newComment.length() > this.MAX_CHAR_PER_COMMENT){
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Comment is too long.");
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, 
+        String.format("Comment must have fewer than %d characters.", this.MAX_CHAR_PER_COMMENT));
       return;
     }
     long timestamp = System.currentTimeMillis();

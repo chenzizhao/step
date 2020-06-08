@@ -66,7 +66,7 @@ function grow() {
 
 function getComments() {
   const limit = document.getElementById('limit').value;
-  
+
   fetch(`/data?limit=${limit}`)
     .then(response => response.json())
     .then(comments => {
@@ -78,7 +78,7 @@ function getComments() {
       while (optionContainer.firstChild) {
         optionContainer.firstChild.remove();
       }
-      for (const comment of comments){
+      for (const comment of comments) {
         const commentElement = document.createElement('li');
         commentElement.innerText = comment;
         commentsContainer.appendChild(commentElement);
@@ -91,18 +91,18 @@ function getComments() {
 }
 
 function deleteComments() {
-  const request = new Request('/data', {method: 'DELETE'});
-  fetch(request).then(()=>getComments());
+  const request = new Request('/data', { method: 'DELETE' });
+  fetch(request).then(() => getComments());
 }
 
 function submitComment() {
   const newComment = document.getElementById('new-comment').value;
-  const request = new Request(`/data?new-comment=${newComment}`, {method:'POST'});
-  fetch(request).then(()=>getComments());
+  const request = new Request(`/data?new-comment=${newComment}`, { method: 'POST' });
+  fetch(request).then(() => getComments());
 }
 
-function likeComment(){
+function likeComment() {
   const like = document.getElementById('like').value;
-  const request = new Request(`/like?like=${like}`, {method:'POST'})
-  fetch(request).then(()=>getComments());
+  const request = new Request(`/like?like=${like}`, { method: 'POST' })
+  fetch(request).then(() => getComments());
 }
