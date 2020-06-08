@@ -65,12 +65,26 @@ function grow() {
 }
 
 function getComments() {
-  fetch('/data').then(response => response.json()).then(comments => {
-    const commentsContainer = document.getElementById('comments-container');
-    for (const comment of comments){
-      const commentElement = document.createElement('li');
-      commentElement.innerText = comment;
-      commentsContainer.appendChild(commentElement);
-    }
-  });
+  const commentsContainer = document.getElementById('comments-container');
+  // Clear all old comments
+  while (commentsContainer.firstChild) {
+    commentsContainer.firstChild.remove();
+  }
+  const limit = document.getElementById("limit").value;
+
+  fetch(`/data?limit=${limit}`)
+    .then(response => response.json())
+    .then(comments => {
+      for (const comment of comments) {
+        const commentElement = document.createElement('li');
+        commentElement.innerText = comment;
+        commentsContainer.appendChild(commentElement);
+      }
+    });
+}
+
+function submitComment() {
+  const newComment = document.getElementById('new-comment').value;
+  const request = new Request(`/data?new-comment=${newComment}`, { method: 'POST' });
+  fetch(request).then(() => getComments());
 }
