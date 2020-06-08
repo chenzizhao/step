@@ -57,10 +57,8 @@ public class DataServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, ERR_MSG);
       return;
     }
-
     Query query = new Query("Comment")
-                    .addSort("like", SortDirection.DESCENDING)
-                    .addSort("timestamp", SortDirection.DESCENDING);
+                    .addSort("like", SortDirection.DESCENDING);
     PreparedQuery pq = this.datastore.prepare(query);
 
     List<String> comments = pq.asList(FetchOptions.Builder.withLimit(limit))
