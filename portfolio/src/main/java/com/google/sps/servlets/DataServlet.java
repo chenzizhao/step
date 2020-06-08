@@ -41,7 +41,7 @@ public class DataServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    int limit = 3;
+    int limit;
     try {
       limit = Integer.parseInt(request.getParameter("limit"));
     }
