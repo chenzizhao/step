@@ -58,7 +58,9 @@ public class DataServlet extends HttpServlet {
       return;
     }
 
-    Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
+    Query query = new Query("Comment")
+                    .addSort("like", SortDirection.DESCENDING)
+                    .addSort("timestamp", SortDirection.DESCENDING);
     PreparedQuery pq = this.datastore.prepare(query);
 
     List<String> comments = pq.asList(FetchOptions.Builder.withLimit(limit))
@@ -88,6 +90,7 @@ public class DataServlet extends HttpServlet {
     Entity commentEntity = new Entity("Comment");
     commentEntity.setProperty("content", newComment);
     commentEntity.setProperty("timestamp", timestamp);
+    commentEntity.setProperty("like", (long)0);
     this.datastore.put(commentEntity);
   }
 

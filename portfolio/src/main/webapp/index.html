@@ -37,7 +37,7 @@
     </form>
     <br>
     <form>
-      <label>Display the latest comments </label>
+      <label>Display the most popular comments </label>
       <select name="limit" id="limit">
         <option value="3" selected="selected">3</option>
         <option value="10">10</option>
@@ -45,7 +45,13 @@
       </select>
       <button type="button" onclick="getComments()">Refresh</button>  
     </form>  
-    <ul id="comments-container"></ul>
+    <ol id="comments-container"></ol>
+    <form>
+      <select name="like" id="like">
+      </select>
+      <button type="button" onclick="likeComment()">👍</button>
+    </form>
+    <br>
     <button type="button" onclick="deleteComments()">Delete comments</button>    
 </body>
 

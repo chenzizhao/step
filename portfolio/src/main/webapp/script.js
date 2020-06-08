@@ -65,20 +65,27 @@ function grow() {
 }
 
 function getComments() {
-  const commentsContainer = document.getElementById('comments-container');
-  // Clear all old comments
-  while (commentsContainer.firstChild) {
-    commentsContainer.firstChild.remove();
-  }
-  const limit = document.getElementById("limit").value;
+  const limit = document.getElementById('limit').value;
   
   fetch(`/data?limit=${limit}`)
     .then(response => response.json())
     .then(comments => {
+      const commentsContainer = document.getElementById('comments-container');
+      while (commentsContainer.firstChild) {
+        commentsContainer.firstChild.remove();
+      }
+      const optionContainer = document.getElementById('like')
+      while (optionContainer.firstChild) {
+        optionContainer.firstChild.remove();
+      }
       for (const comment of comments){
         const commentElement = document.createElement('li');
         commentElement.innerText = comment;
         commentsContainer.appendChild(commentElement);
+        const optionElement = document.createElement('option');
+        optionElement.value = comment;
+        optionElement.innerText = comment.slice(0, 20);
+        optionContainer.appendChild(optionElement);
       }
     });
 }
@@ -91,5 +98,11 @@ function deleteComments() {
 function submitComment() {
   const newComment = document.getElementById('new-comment').value;
   const request = new Request(`/data?new-comment=${newComment}`, {method:'POST'});
+  fetch(request).then(()=>getComments());
+}
+
+function likeComment(){
+  const like = document.getElementById('like').value;
+  const request = new Request(`/like?like=${like}`, {method:'POST'})
   fetch(request).then(()=>getComments());
 }
