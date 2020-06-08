@@ -91,4 +91,13 @@ public class DataServlet extends HttpServlet {
     commentEntity.setProperty("timestamp", timestamp);
     this.datastore.put(commentEntity);
   }
+
+  @Override
+  public void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    Query q = new Query("Comment").setKeysOnly();
+    PreparedQuery pq = this.datastore.prepare(q);
+    for (Entity entity : pq.asIterable()){
+      this.datastore.delete(entity.getKey());
+    }
+  }
 }
