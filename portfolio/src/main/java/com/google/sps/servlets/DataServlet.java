@@ -37,6 +37,7 @@ public class DataServlet extends HttpServlet {
   static final private String ERR_MSG = 
     "Comment limit must be a non-negative integer, and do not exceed the maximum.";
   static final private int MAX_LIMIT_COMMENTS = 50;
+  static final private int MAX_CHAR_PER_COMMENT = 280;
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -73,12 +74,16 @@ public class DataServlet extends HttpServlet {
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {    
     String newComment = request.getParameter("new-comment");
-    long timestamp = System.currentTimeMillis();
-
     if (newComment == null || newComment.isEmpty()){
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Comment must be a non-empty string.");
       return;
     }
+
+    if (newComment.length() > this.MAX_CHAR_PER_COMMENT){
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Comment is too long.");
+      return;
+    }
+    long timestamp = System.currentTimeMillis();
     
     Entity commentEntity = new Entity("Comment");
     commentEntity.setProperty("content", newComment);
