@@ -17,7 +17,7 @@ import com.google.appengine.api.datastore.Transaction;
 
 /* 
 REQUEST: a POST query string like this "/like?likeID=1234567890123456"
-Behavior: update "like" attribute in the database
+Behavior: update "like" counter in the database
 */
 
 @WebServlet("/like")
@@ -29,12 +29,13 @@ public class LikeServlet extends HttpServlet {
     long commentId;
     try {
       commentId = Long.parseLong(request.getParameter("commentId"));
-    } catch (NumberFormatException e){
+    } catch (NumberFormatException e) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid comment ID.");
       return;
     }
     Key likeKey = KeyFactory.createKey("Comment", commentId);
-
+    // Wrap retrieving and storing entity in one transaction
+    // to avoid counting collision. 
     int retries = 3;
     while (true) {
       Transaction txn = datastore.beginTransaction();
@@ -42,32 +43,20 @@ public class LikeServlet extends HttpServlet {
       try {
         commentEntity = datastore.get(likeKey);        
       } catch (EntityNotFoundException e) {
-        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Comment does not exist");
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Comment not found.");
         break;
       }
-      long count = (long) commentEntity.getProperty("like");
+      long count = (long) commentEntity.getProperty("likeCount");
       ++count;
-      try {
-        Thread.sleep(5000); // test 
-        System.out.println("sleep ended");
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-        break; // 5000 for test only, related to Thread.sleep
-      }
-      commentEntity.setProperty("like", count);
+      commentEntity.setProperty("likeCount", count);
       datastore.put(txn, commentEntity);
       try {
         txn.commit();
-        System.out.println("transaction success"); // DEBUG
         break;
       } catch (ConcurrentModificationException e) {
         if (retries == 0) {
-          System.out.println("concurrent modification exception"); // DEBUG
-          // throw e;
-          response.sendError(HttpServletResponse.SC_CONFLICT, "Database busy");
+          response.sendError(HttpServletResponse.SC_CONFLICT, "Database busy.");
         }
-        // Allow retry to occur
-        System.out.println("reties"); // DEBUG
         --retries;
       } finally {
         if (txn.isActive()) {

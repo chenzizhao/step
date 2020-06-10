@@ -2,10 +2,12 @@ package com.google.sps.data;
 
 public class Comment {
   public String content;
-  public long ID;
+  public long id;
+  public long likeCount;
 
-  public Comment(String content, long ID) {
+  public Comment(String content, long id, long likeCount) {
     this.content = content;
-    this.ID = ID;
+    this.id = id;
+    this.likeCount = likeCount;
   }
 }

@@ -72,17 +72,15 @@ function getComments() {
     .then(comments => {
       const commentsContainer = document.getElementById('comments-container');
       commentsContainer.innerHTML = '';
-      const optionContainer = document.getElementById('like')
-      optionContainer.innerHTML = '';
 
       for (const comment of comments) {
-        const commentElement = document.createElement('li');
-        commentElement.innerText = comment.content;
+        const commentElement = document.createElement('div');
+        commentElement.innerText = `${comment.content} -- ${comment.likeCount}`;
+        const likeButton = document.createElement('button');
+        likeButton.innerText = '👍';
+        likeButton.addEventListener('click', () => likeComment(comment.id));
+        commentElement.appendChild(likeButton);
         commentsContainer.appendChild(commentElement);
-        const optionElement = document.createElement('option');
-        optionElement.value = comment.ID;
-        optionElement.innerText = comment.content.slice(0, 20);
-        optionContainer.appendChild(optionElement);
       }
     });
 }
@@ -94,13 +92,11 @@ function deleteComments() {
 
 function submitComment() {
   const newComment = document.getElementById('new-comment').value;
-  const request = new Request(`/data?new-comment=${newComment}`, { method: 'POST' });
+  const request = new Request(`/data?newComment=${newComment}`, { method: 'POST' });
   fetch(request).then(() => getComments());
 }
 
-function likeComment() {
-  const commentId = document.getElementById('like').value;
-  console.log("DEBUG: likeID = " + commentId);
+function likeComment(commentId) {
   const request = new Request(`/like?commentId=${commentId}`, { method: 'POST' })
   fetch(request).then(() => getComments());
 }

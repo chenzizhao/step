@@ -53,32 +53,32 @@ public class DataServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, ERR_MSG);
       return;
     }
-    if (limit>this.MAX_LIMIT_COMMENTS){
+    if (limit > this.MAX_LIMIT_COMMENTS) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, ERR_MSG);
       return;
     }
-    System.out.println("limit is fine");
-    Query query = new Query("Comment").addSort("like", SortDirection.DESCENDING);
-    PreparedQuery pq = this.datastore.prepare(query);
+    
+    Query q = new Query("Comment").addSort("likeCount", SortDirection.DESCENDING);
+    PreparedQuery pq = this.datastore.prepare(q);
 
     List<Comment> comments = pq.asList(FetchOptions.Builder.withLimit(limit))
       .stream()
-      .map(entity-> new Comment((String)entity.getProperty("content"), (long)entity.getKey().getId()))
+        .map(
+            entity -> new Comment(
+                (String) entity.getProperty("content"), 
+                (long) entity.getKey().getId(),
+                (long) entity.getProperty("likeCount"))
+            )
       .collect(Collectors.toList());
     
-    System.out.println("Parsing is fine");
-    
     String json = new Gson().toJson(comments);
-
-    System.out.println("Conversion is fine " + json);
-
     response.setContentType("application/json;");
     response.getWriter().println(json);
   }
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {    
-    String newComment = request.getParameter("new-comment");
+    String newComment = request.getParameter("newComment");
     if (newComment == null || newComment.isEmpty()){
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Comment must be a non-empty string.");
       return;
@@ -94,7 +94,7 @@ public class DataServlet extends HttpServlet {
     Entity commentEntity = new Entity("Comment");
     commentEntity.setProperty("content", newComment);
     commentEntity.setProperty("timestamp", timestamp);
-    commentEntity.setProperty("like", 0);
+    commentEntity.setProperty("likeCount", 0);
     this.datastore.put(commentEntity);
   }
 
