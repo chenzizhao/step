@@ -15,6 +15,7 @@
 package com.google.sps.servlets;
 
 import com.google.gson.Gson;
+import com.google.sps.data.Comment;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -30,22 +31,21 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/** Servlet that returns some example content. TODO: modify this file to handle comments data */
+
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
   private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
   final private int MAX_LIMIT_COMMENTS = 50;
   final private int MAX_CHAR_PER_COMMENT = 280;
   final private String ERR_MSG = 
-    String.format("Comment limit must be a non-negative integer, and do not exceed %d.", this.MAX_LIMIT_COMMENTS);
-
+      String.format("Comment limit must be a non-negative integer, and do not exceed %d.", this.MAX_LIMIT_COMMENTS);
+  
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     int limit;
     try {
       limit = Integer.parseInt(request.getParameter("limit"));
-    }
-    catch(NumberFormatException e){
+    } catch (NumberFormatException e) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, ERR_MSG);
       return;
     }
@@ -57,15 +57,21 @@ public class DataServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, ERR_MSG);
       return;
     }
+    System.out.println("limit is fine");
     Query query = new Query("Comment").addSort("like", SortDirection.DESCENDING);
     PreparedQuery pq = this.datastore.prepare(query);
 
-    List<String> comments = pq.asList(FetchOptions.Builder.withLimit(limit))
+    List<Comment> comments = pq.asList(FetchOptions.Builder.withLimit(limit))
       .stream()
-      .map(entity->(String) entity.getProperty("content"))
+      .map(entity-> new Comment((String)entity.getProperty("content"), (long)entity.getKey().getId()))
       .collect(Collectors.toList());
     
+    System.out.println("Parsing is fine");
+    
     String json = new Gson().toJson(comments);
+
+    System.out.println("Conversion is fine " + json);
+
     response.setContentType("application/json;");
     response.getWriter().println(json);
   }

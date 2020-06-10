@@ -71,20 +71,17 @@ function getComments() {
     .then(response => response.json())
     .then(comments => {
       const commentsContainer = document.getElementById('comments-container');
-      while (commentsContainer.firstChild) {
-        commentsContainer.firstChild.remove();
-      }
+      commentsContainer.innerHTML = '';
       const optionContainer = document.getElementById('like')
-      while (optionContainer.firstChild) {
-        optionContainer.firstChild.remove();
-      }
+      optionContainer.innerHTML = '';
+
       for (const comment of comments) {
         const commentElement = document.createElement('li');
-        commentElement.innerText = comment;
+        commentElement.innerText = comment.content;
         commentsContainer.appendChild(commentElement);
         const optionElement = document.createElement('option');
-        optionElement.value = comment;
-        optionElement.innerText = comment.slice(0, 20);
+        optionElement.value = comment.ID;
+        optionElement.innerText = comment.content.slice(0, 20);
         optionContainer.appendChild(optionElement);
       }
     });
@@ -102,7 +99,8 @@ function submitComment() {
 }
 
 function likeComment() {
-  const like = document.getElementById('like').value;
-  const request = new Request(`/like?like=${like}`, { method: 'POST' })
+  const commentId = document.getElementById('like').value;
+  console.log("DEBUG: likeID = " + commentId);
+  const request = new Request(`/like?commentId=${commentId}`, { method: 'POST' })
   fetch(request).then(() => getComments());
 }
