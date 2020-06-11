@@ -67,12 +67,13 @@ public class DataServlet extends HttpServlet {
 
     List<Comment> comments = pq.asList(FetchOptions.Builder.withLimit(limit))
       .stream()
-        .map(
-            entity -> new Comment(
-                (String) entity.getProperty("content"), 
-                (long) entity.getKey().getId(),
-                (long) entity.getProperty("likeCount"))
-            )
+      .map(
+          entity -> new Comment(
+              (String) entity.getProperty("content"), 
+              (long) entity.getKey().getId(),
+              (long) entity.getProperty("likeCount"),
+              (String) entity.getProperty("email"))
+          )
       .collect(Collectors.toList());
     
     String json = new Gson().toJson(comments);
