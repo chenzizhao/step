@@ -15,6 +15,12 @@
 /**
  * Adds a random greeting to the page.
  */
+
+function loadPage() {
+  getComments();
+  addLoginStatus();
+}
+
 function findZoe() {
   const locationToLink = {
     '43.5˚N, 79.4˚W':
@@ -77,9 +83,7 @@ function getComments() {
         const commentElement = document.createElement('div');
         commentElement.innerText = `${comment.content} -- ${comment.likeCount}`;
         commentElement.className = 'comment-container';
-        const likeButton = document.createElement('button');
-        likeButton.innerText = '👍';
-        likeButton.addEventListener('click', () => likeComment(comment.id));
+        const likeButton = createButton('👍', function () { likeComment(comment.id); })
         commentElement.appendChild(likeButton);
         commentsContainer.appendChild(commentElement);
       }
@@ -102,65 +106,47 @@ function likeComment(commentId) {
   fetch(request).then(() => getComments());
 }
 
-function checkLoginStatus() {
+function addLoginStatus() {
   const request = new Request('/login', { method: 'GET' });
   fetch(request)
     .then(response => response.json())
-    .then(isLoggedIn => {
+    .then(userLoginData => {
       const deleteButtonContainer = document.getElementById('delete-container');
-      const leaveCommentForm = document.getElementById('leave-a-comment');
+      const commentSubmissionForm = document.getElementById('comment-submission-form');
       const loginContainer = document.getElementById('login-container');
-      if (isLoggedIn) {
-        buildLoggedInPage(deleteButtonContainer, leaveCommentForm, loginContainer)
-      } else {
-        buildLoggedOutPage(deleteButtonContainer, leaveCommentForm, loginContainer)
+      if (userLoginData.isLoggedIn) {
+        deleteButtonContainer.appendChild(createButton('Delete', deleteComments));
+        commentSubmissionForm.appendChild(createInputForm('Leave a comment: ', 'new-comment'));
+        commentSubmissionForm.appendChild(createButton('Submit', submitComment));
+        loginContainer.innerHTML = '';
+        loginContainer.appendChild(createLink('Log Out', userLoginData.url));
       }
-    });
+      else {
+        deleteButtonContainer.innerHTML = '';
+        commentSubmissionForm.innerHTML = '';
+        loginContainer.innerHTML = '';
+        loginContainer.appendChild(createLink('Log In with Google Account', userLoginData.url));
+      }
+    })
 }
 
-function buildLoggedInPage(deleteButtonContainer, leaveCommentForm, loginContainer) {
-  const deleteButton = document.createElement('button');
-  deleteButton.innerText = 'Delete all comments';
-  deleteButton.onclick = deleteComments;
-  deleteButtonContainer.appendChild(deleteButton);
-
-  const label = document.createElement('label');
-  label.innerText = 'Leave a comment';
-  leaveCommentForm.appendChild(label);
-
-  const inputComment = document.createElement('input');
-  inputComment.id = 'new-comment';
-  inputComment.name = 'new-comment';
-  leaveCommentForm.appendChild(inputComment);
-
-  const submitButton = document.createElement('button');
-  submitButton.innerText = 'Submit';
-  submitButton.onclick = submitComment;
-  leaveCommentForm.appendChild(submitButton);
-
-  const request = new Request('/login', { method: 'POST' });
-  fetch(request)
-    .then(response => response.text())
-    .then(logOutUrl => {
-      const logOutLink = document.createElement('a');
-      logOutLink.innerText = 'Log Out';
-      logOutLink.href = logOutUrl;
-      loginContainer.innerHTML = '';
-      loginContainer.appendChild(logOutLink);
-    });
+function createButton(msg, onclickFunc) {
+  const button = document.createElement('button');
+  button.innerText = msg;
+  button.onclick = onclickFunc;
+  return button;
 }
 
-function buildLoggedOutPage(deleteButtonContainer, leaveCommentForm, loginContainer) {
-  deleteButtonContainer.innerHTML = '';
-  leaveCommentForm.innerHTML = '';
-  const request = new Request('/login', { method: 'POST' });
-  fetch(request)
-    .then(response => response.text())
-    .then(logInUrl => {
-      const logInLink = document.createElement('a');
-      logInLink.innerText = 'Log In with Google Account';
-      logInLink.href = logInUrl;
-      loginContainer.innerHTML = '';
-      loginContainer.appendChild(logInLink);
-    });
+function createInputForm(msg, id) {
+  const inputForm = document.createElement('input');
+  inputForm.placeholder = msg;
+  inputForm.id = id;
+  return inputForm;
+}
+
+function createLink(msg, url) {
+  const link = document.createElement('a');
+  link.innerText = msg;
+  link.href = url;
+  return link;
 }
