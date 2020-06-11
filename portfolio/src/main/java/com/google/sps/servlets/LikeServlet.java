@@ -39,17 +39,12 @@ public class LikeServlet extends HttpServlet {
     int retries = 3;
     while (true) {
       Transaction txn = datastore.beginTransaction();
-      Entity commentEntity;
       try {
-        commentEntity = datastore.get(likeKey);        
+        buildTransaction(datastore, likeKey, txn);
       } catch (EntityNotFoundException e) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Comment not found.");
         break;
       }
-      long count = (long) commentEntity.getProperty("likeCount");
-      ++count;
-      commentEntity.setProperty("likeCount", count);
-      datastore.put(txn, commentEntity);
       try {
         txn.commit();
         break;
@@ -65,4 +60,18 @@ public class LikeServlet extends HttpServlet {
       }
     } // end of while loop
   } // end of doPost
+
+  private void buildTransaction(DatastoreService datastore, Key key, Transaction txn) 
+    throws EntityNotFoundException{
+    Entity commentEntity;
+    try {
+      commentEntity = datastore.get(key);        
+    } catch (EntityNotFoundException e) {
+      throw e;
+    }
+    long count = (long) commentEntity.getProperty("likeCount");
+    ++count;
+    commentEntity.setProperty("likeCount", count);
+    datastore.put(txn, commentEntity);
+  }
 }
