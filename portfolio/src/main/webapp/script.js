@@ -122,7 +122,7 @@ function checkLoginStatus() {
 function buildLoggedInPage(deleteButtonContainer, leaveCommentForm, loginContainer) {
   const deleteButton = document.createElement('button');
   deleteButton.innerText = 'Delete all comments';
-  deleteButton.onclick = 'deleteComments()';
+  deleteButton.onclick = deleteComments;
   deleteButtonContainer.appendChild(deleteButton);
 
   const label = document.createElement('label');
@@ -136,7 +136,7 @@ function buildLoggedInPage(deleteButtonContainer, leaveCommentForm, loginContain
 
   const submitButton = document.createElement('button');
   submitButton.innerText = 'Submit';
-  submitButton.onclick = 'submitComment()';
+  submitButton.onclick = submitComment;
   leaveCommentForm.appendChild(submitButton);
 
   const request = new Request('/login', { method: 'POST' });
