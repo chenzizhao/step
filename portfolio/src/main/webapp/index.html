@@ -8,8 +8,11 @@
   <script src="script.js"></script>
 </head>
 
-<body onload="getComments()">
+<body onload="getComments();checkLoginStatus();">
   <div id="content">
+    <div id='login-container'>
+      <!-- Content depend on login status -->
+    </div>
     <h1>Zoe's Portfolio</h1>
     <p>Welcome! This is my portfolio.</p>
     <br>
@@ -30,10 +33,8 @@
     <p id="endMsg"></p>
     <br>
     <h2>Comments</h2>
-    <form>
-      <label>Leave a comment </label>
-      <input type="text" id="new-comment" name="new-comment">
-      <button type="button" onclick="submitComment()">Submit</button>
+    <form id="leave-a-comment">
+      <!-- Content hidden when logged out -->
     </form>
     <br>
     <form>
@@ -47,7 +48,9 @@
     </form>
     <div id="comments-container" class="comments-container"></div>
     <br>
-    <button type="button" onclick="deleteComments()">Delete comments</button>
+    <div id="delete-container">
+      <!-- Content hidden when logged out -->
+    </div>
 </body>
 
 </html>
