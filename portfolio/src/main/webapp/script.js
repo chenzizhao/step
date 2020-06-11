@@ -75,7 +75,8 @@ function getComments() {
 
       for (const comment of comments) {
         const commentElement = document.createElement('div');
-        commentElement.innerText = `${comment.content} -- ${comment.likeCount}`;
+        commentElement.innerText =
+          `${comment.content} by ${comment.email}-- ${comment.likeCount}`;
         commentElement.className = 'comment-container';
         const likeButton = document.createElement('button');
         likeButton.innerText = '👍';
