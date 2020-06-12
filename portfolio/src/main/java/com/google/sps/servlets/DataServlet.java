@@ -76,7 +76,7 @@ public class DataServlet extends HttpServlet {
               (long) entity.getKey().getId(),
               (long) entity.getProperty("likeCount"),
               (String) entity.getProperty("email"),
-              (float) entity.getProperty("sentimentScore"))
+              (float)(double) entity.getProperty("sentimentScore"))
           )
       .collect(Collectors.toList());
     
