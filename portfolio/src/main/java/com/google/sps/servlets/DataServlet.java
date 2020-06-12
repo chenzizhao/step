@@ -25,6 +25,9 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.cloud.language.v1.Document;
+import com.google.cloud.language.v1.LanguageServiceClient;
+import com.google.cloud.language.v1.Sentiment;
 
 import java.io.IOException;
 import java.util.List;
@@ -72,7 +75,8 @@ public class DataServlet extends HttpServlet {
               (String) entity.getProperty("content"), 
               (long) entity.getKey().getId(),
               (long) entity.getProperty("likeCount"),
-              (String) entity.getProperty("email"))
+              (String) entity.getProperty("email"),
+              (float) entity.getProperty("sentimentScore"))
           )
       .collect(Collectors.toList());
     
@@ -101,12 +105,14 @@ public class DataServlet extends HttpServlet {
       return;
     }
     long timestamp = System.currentTimeMillis();
+    float sentimentScore = getSentimentScore(newComment);
     
     Entity commentEntity = new Entity("Comment");
     commentEntity.setProperty("content", newComment);
     commentEntity.setProperty("timestamp", timestamp);
     commentEntity.setProperty("likeCount", 0);
     commentEntity.setProperty("email", userEmail);
+    commentEntity.setProperty("sentimentScore", sentimentScore);
     this.datastore.put(commentEntity);
   }
 
@@ -114,8 +120,21 @@ public class DataServlet extends HttpServlet {
   public void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
     Query q = new Query("Comment").setKeysOnly();
     PreparedQuery pq = this.datastore.prepare(q);
-    for (Entity entity : pq.asIterable()){
+    for (Entity entity : pq.asIterable()) {
       this.datastore.delete(entity.getKey());
     }
+  }
+  
+  private float getSentimentScore(String msg) throws IOException {
+    // Use Sentiment Analysis API
+    Document doc =
+      Document.newBuilder().setContent(msg).setType(Document.Type.PLAIN_TEXT).build();
+    LanguageServiceClient languageService = LanguageServiceClient.create();
+    Sentiment sentiment = languageService.analyzeSentiment(doc).getDocumentSentiment();
+    float score = sentiment.getScore();
+    languageService.close();
+    // The score is a float number between -1 and 1.
+    // The greater the score is, the more positive the msg is.
+    return score;
   }
 }
