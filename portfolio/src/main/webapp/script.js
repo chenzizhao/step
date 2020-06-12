@@ -82,7 +82,7 @@ function getComments() {
       for (const comment of comments) {
         const commentElement = document.createElement('div');
         commentElement.innerText =
-          `${comment.content} by ${comment.email} (Sentiment Score:${this.sentimentScore})
+          `${comment.content} by ${comment.email} (Sentiment Score:${comment.sentimentScore})
            -- ${comment.likeCount}`;
         commentElement.className = 'comment-container';
         const likeButton = createButton('👍', function () { likeComment(comment.id); })
