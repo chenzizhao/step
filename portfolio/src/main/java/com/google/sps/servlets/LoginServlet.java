@@ -2,6 +2,8 @@ package com.google.sps.servlets;
 
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.gson.Gson;
+import com.google.sps.data.UserLoginData;
 
 import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
@@ -15,22 +17,12 @@ public class LoginServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    response.setContentType("text/html;");
-    boolean status = userService.isUserLoggedIn();
-    response.getWriter().println(Boolean.toString(status));
-  }
-
-  @Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    response.setContentType("text/html;");
-    if (userService.isUserLoggedIn()) {
-      String urlToRedirectToAfterUserLogsOut = "/";
-      String logoutUrl = userService.createLogoutURL(urlToRedirectToAfterUserLogsOut);
-      response.getWriter().println(logoutUrl);
-    } else {
-      String urlToRedirectToAfterUserLogsIn = "/";
-      String loginUrl = userService.createLoginURL(urlToRedirectToAfterUserLogsIn);
-      response.getWriter().println(loginUrl);
-    }
+    response.setContentType("application/json;");
+    boolean isLoggedIn = userService.isUserLoggedIn();
+    String urlToRedirect = "/";
+    String url = isLoggedIn ? 
+      userService.createLogoutURL(urlToRedirect) : userService.createLoginURL(urlToRedirect);
+    UserLoginData userLoginData = new UserLoginData(isLoggedIn, url);
+    response.getWriter().println(new Gson().toJson(userLoginData));
   }
 }

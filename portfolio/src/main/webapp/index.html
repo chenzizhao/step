@@ -8,7 +8,7 @@
   <script src="script.js"></script>
 </head>
 
-<body onload="getComments();checkLoginStatus();">
+<body onload="loadPage()">
   <div id="content">
     <div id='login-container'>
       <!-- Content depend on login status -->
@@ -33,7 +33,7 @@
     <p id="endMsg"></p>
     <br>
     <h2>Comments</h2>
-    <form id="leave-a-comment">
+    <form id="comment-submission-form">
       <!-- Content hidden when logged out -->
     </form>
     <br>
