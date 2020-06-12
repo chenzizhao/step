@@ -15,6 +15,7 @@
 package com.google.sps.servlets;
 
 import com.google.gson.Gson;
+import com.google.sps.data.Comment;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -30,22 +31,21 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/** Servlet that returns some example content. TODO: modify this file to handle comments data */
+
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
   private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
   final private int MAX_LIMIT_COMMENTS = 50;
   final private int MAX_CHAR_PER_COMMENT = 280;
   final private String ERR_MSG = 
-    String.format("Comment limit must be a non-negative integer, and do not exceed %d.", this.MAX_LIMIT_COMMENTS);
-
+      String.format("Comment limit must be a non-negative integer, and do not exceed %d.", this.MAX_LIMIT_COMMENTS);
+  
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     int limit;
     try {
       limit = Integer.parseInt(request.getParameter("limit"));
-    }
-    catch(NumberFormatException e){
+    } catch (NumberFormatException e) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, ERR_MSG);
       return;
     }
@@ -53,17 +53,22 @@ public class DataServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, ERR_MSG);
       return;
     }
-    if (limit>this.MAX_LIMIT_COMMENTS){
+    if (limit > this.MAX_LIMIT_COMMENTS) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, ERR_MSG);
       return;
     }
+    
+    Query q = new Query("Comment").addSort("likeCount", SortDirection.DESCENDING);
+    PreparedQuery pq = this.datastore.prepare(q);
 
-    Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
-    PreparedQuery pq = this.datastore.prepare(query);
-
-    List<String> comments = pq.asList(FetchOptions.Builder.withLimit(limit))
+    List<Comment> comments = pq.asList(FetchOptions.Builder.withLimit(limit))
       .stream()
-      .map(entity->(String) entity.getProperty("content"))
+        .map(
+            entity -> new Comment(
+                (String) entity.getProperty("content"), 
+                (long) entity.getKey().getId(),
+                (long) entity.getProperty("likeCount"))
+            )
       .collect(Collectors.toList());
     
     String json = new Gson().toJson(comments);
@@ -73,7 +78,7 @@ public class DataServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {    
-    String newComment = request.getParameter("new-comment");
+    String newComment = request.getParameter("newComment");
     if (newComment == null || newComment.isEmpty()){
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Comment must be a non-empty string.");
       return;
@@ -89,6 +94,7 @@ public class DataServlet extends HttpServlet {
     Entity commentEntity = new Entity("Comment");
     commentEntity.setProperty("content", newComment);
     commentEntity.setProperty("timestamp", timestamp);
+    commentEntity.setProperty("likeCount", 0);
     this.datastore.put(commentEntity);
   }
 

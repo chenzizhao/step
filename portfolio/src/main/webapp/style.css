@@ -12,3 +12,13 @@ img {
   max-width: 100%;
   height: auto;
 }
+
+.comments-container{
+  background-color: antiquewhite;
+  margin: auto;
+}
+
+.comment-container{
+  color:darkslategray;
+  margin: auto;
+}

@@ -65,31 +65,39 @@ function grow() {
 }
 
 function getComments() {
-  const commentsContainer = document.getElementById('comments-container');
-  // Clear all old comments
-  while (commentsContainer.firstChild) {
-    commentsContainer.firstChild.remove();
-  }
-  const limit = document.getElementById("limit").value;
+  const limit = document.getElementById('limit').value;
 
   fetch(`/data?limit=${limit}`)
     .then(response => response.json())
     .then(comments => {
+      const commentsContainer = document.getElementById('comments-container');
+      commentsContainer.innerHTML = '';
+
       for (const comment of comments) {
-        const commentElement = document.createElement('li');
-        commentElement.innerText = comment;
+        const commentElement = document.createElement('div');
+        commentElement.innerText = `${comment.content} -- ${comment.likeCount}`;
+        commentElement.className = 'comment-container';
+        const likeButton = document.createElement('button');
+        likeButton.innerText = '👍';
+        likeButton.addEventListener('click', () => likeComment(comment.id));
+        commentElement.appendChild(likeButton);
         commentsContainer.appendChild(commentElement);
       }
     });
 }
 
 function deleteComments() {
-  const request = new Request('/data', {method: 'DELETE'});
-  fetch(request).then(()=>getComments());
+  const request = new Request('/data', { method: 'DELETE' });
+  fetch(request).then(() => getComments());
 }
 
 function submitComment() {
   const newComment = document.getElementById('new-comment').value;
-  const request = new Request(`/data?new-comment=${newComment}`, { method: 'POST' });
+  const request = new Request(`/data?newComment=${newComment}`, { method: 'POST' });
+  fetch(request).then(() => getComments());
+}
+
+function likeComment(commentId) {
+  const request = new Request(`/like?commentId=${commentId}`, { method: 'POST' })
   fetch(request).then(() => getComments());
 }
