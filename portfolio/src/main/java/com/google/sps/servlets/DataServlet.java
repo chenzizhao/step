@@ -23,6 +23,9 @@ import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,6 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
   private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+  private UserService userService = UserServiceFactory.getUserService();
   final private int MAX_LIMIT_COMMENTS = 50;
   final private int MAX_CHAR_PER_COMMENT = 280;
   final private String ERR_MSG = 
@@ -63,12 +67,13 @@ public class DataServlet extends HttpServlet {
 
     List<Comment> comments = pq.asList(FetchOptions.Builder.withLimit(limit))
       .stream()
-        .map(
-            entity -> new Comment(
-                (String) entity.getProperty("content"), 
-                (long) entity.getKey().getId(),
-                (long) entity.getProperty("likeCount"))
-            )
+      .map(
+          entity -> new Comment(
+              (String) entity.getProperty("content"), 
+              (long) entity.getKey().getId(),
+              (long) entity.getProperty("likeCount"),
+              (String) entity.getProperty("email"))
+          )
       .collect(Collectors.toList());
     
     String json = new Gson().toJson(comments);
@@ -78,6 +83,12 @@ public class DataServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {    
+    if (!userService.isUserLoggedIn()) {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN, "Please log in before commenting.");
+      return;
+    }
+    String userEmail = userService.getCurrentUser().getEmail();
+    
     String newComment = request.getParameter("newComment");
     if (newComment == null || newComment.isEmpty()){
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Comment must be a non-empty string.");
@@ -95,6 +106,7 @@ public class DataServlet extends HttpServlet {
     commentEntity.setProperty("content", newComment);
     commentEntity.setProperty("timestamp", timestamp);
     commentEntity.setProperty("likeCount", 0);
+    commentEntity.setProperty("email", userEmail);
     this.datastore.put(commentEntity);
   }
 
