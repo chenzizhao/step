@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     https://www.apache.org/licenses/LICENSE-2.0
+// https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,9 +44,10 @@ public class DataServlet extends HttpServlet {
   private UserService userService = UserServiceFactory.getUserService();
   final private int MAX_LIMIT_COMMENTS = 50;
   final private int MAX_CHAR_PER_COMMENT = 280;
-  final private String ERR_MSG = 
-      String.format("Comment limit must be a non-negative integer, and do not exceed %d.", this.MAX_LIMIT_COMMENTS);
-  
+  final private String ERR_MSG =
+      String.format("Comment limit must be a non-negative integer, and do not exceed %d.",
+          this.MAX_LIMIT_COMMENTS);
+
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     int limit;
@@ -56,7 +57,7 @@ public class DataServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, ERR_MSG);
       return;
     }
-    if (limit<0){
+    if (limit < 0) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, ERR_MSG);
       return;
     }
@@ -64,49 +65,44 @@ public class DataServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, ERR_MSG);
       return;
     }
-    
+
     Query q = new Query("Comment").addSort("likeCount", SortDirection.DESCENDING);
     PreparedQuery pq = this.datastore.prepare(q);
 
-    List<Comment> comments = pq.asList(FetchOptions.Builder.withLimit(limit))
-      .stream()
-      .map(
-          entity -> new Comment(
-              (String) entity.getProperty("content"), 
-              (long) entity.getKey().getId(),
-              (long) entity.getProperty("likeCount"),
-              (String) entity.getProperty("email"),
-              (float)(double) entity.getProperty("sentimentScore"))
-          )
-      .collect(Collectors.toList());
-    
+    List<Comment> comments = pq.asList(FetchOptions.Builder.withLimit(limit)).stream()
+        .map(entity -> new Comment((String) entity.getProperty("content"),
+            (long) entity.getKey().getId(), (long) entity.getProperty("likeCount"),
+            (String) entity.getProperty("email"),
+            (float) (double) entity.getProperty("sentimentScore")))
+        .collect(Collectors.toList());
+
     String json = new Gson().toJson(comments);
     response.setContentType("application/json;");
     response.getWriter().println(json);
   }
 
   @Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {    
+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     if (!userService.isUserLoggedIn()) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN, "Please log in before commenting.");
       return;
     }
     String userEmail = userService.getCurrentUser().getEmail();
-    
+
     String newComment = request.getParameter("newComment");
-    if (newComment == null || newComment.isEmpty()){
+    if (newComment == null || newComment.isEmpty()) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Comment must be a non-empty string.");
       return;
     }
 
-    if (newComment.length() > this.MAX_CHAR_PER_COMMENT){
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST, 
-        String.format("Comment must have fewer than %d characters.", this.MAX_CHAR_PER_COMMENT));
+    if (newComment.length() > this.MAX_CHAR_PER_COMMENT) {
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+          String.format("Comment must have fewer than %d characters.", this.MAX_CHAR_PER_COMMENT));
       return;
     }
     long timestamp = System.currentTimeMillis();
     float sentimentScore = getSentimentScore(newComment);
-    
+
     Entity commentEntity = new Entity("Comment");
     commentEntity.setProperty("content", newComment);
     commentEntity.setProperty("timestamp", timestamp);
@@ -117,18 +113,18 @@ public class DataServlet extends HttpServlet {
   }
 
   @Override
-  public void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
+  public void doDelete(HttpServletRequest request, HttpServletResponse response)
+      throws IOException {
     Query q = new Query("Comment").setKeysOnly();
     PreparedQuery pq = this.datastore.prepare(q);
     for (Entity entity : pq.asIterable()) {
       this.datastore.delete(entity.getKey());
     }
   }
-  
+
   private float getSentimentScore(String msg) throws IOException {
     // Use Sentiment Analysis API
-    Document doc =
-      Document.newBuilder().setContent(msg).setType(Document.Type.PLAIN_TEXT).build();
+    Document doc = Document.newBuilder().setContent(msg).setType(Document.Type.PLAIN_TEXT).build();
     LanguageServiceClient languageService = LanguageServiceClient.create();
     Sentiment sentiment = languageService.analyzeSentiment(doc).getDocumentSentiment();
     float score = sentiment.getScore();

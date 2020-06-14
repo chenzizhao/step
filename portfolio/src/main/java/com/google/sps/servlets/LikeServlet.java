@@ -15,10 +15,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.ConcurrentModificationException;
 import com.google.appengine.api.datastore.Transaction;
 
-/* 
-REQUEST: a POST query string like this "/like?likeID=1234567890123456"
-Behavior: update "like" counter in the database
-*/
+/*
+ * REQUEST: a POST query string like this "/like?likeID=1234567890123456" Behavior: update "like"
+ * counter in the database
+ */
 
 @WebServlet("/like")
 public class LikeServlet extends HttpServlet {
@@ -55,7 +55,8 @@ public class LikeServlet extends HttpServlet {
     }
   } // end of doPost
 
-  private void incrementLikeCounter(Key key) throws EntityNotFoundException, ConcurrentModificationException {
+  private void incrementLikeCounter(Key key)
+      throws EntityNotFoundException, ConcurrentModificationException {
     Transaction txn = datastore.beginTransaction();
     Entity commentEntity;
     try {
