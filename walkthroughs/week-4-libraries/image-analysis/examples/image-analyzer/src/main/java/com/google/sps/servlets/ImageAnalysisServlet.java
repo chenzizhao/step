@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.servlets;
+package com.google.sps.servlets;
 
 import com.google.appengine.api.blobstore.BlobInfo;
 import com.google.appengine.api.blobstore.BlobInfoFactory;
@@ -44,8 +44,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * When the user submits the form, Blobstore processes the file upload and then forwards the request
- * to this servlet. This servlet can then analyze the image using the Vision API.
+ * When the user submits the form, Blobstore processes the file upload and then
+ * forwards the request to this servlet. This servlet can then analyze the image
+ * using the Vision API.
  */
 @WebServlet("/image-analysis")
 public class ImageAnalysisServlet extends HttpServlet {
@@ -90,15 +91,16 @@ public class ImageAnalysisServlet extends HttpServlet {
   }
 
   /**
-   * Returns the BlobKey that points to the file uploaded by the user, or null if the user didn't
-   * upload a file.
+   * Returns the BlobKey that points to the file uploaded by the user, or null if
+   * the user didn't upload a file.
    */
   private BlobKey getBlobKey(HttpServletRequest request, String formInputElementName) {
     BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
     Map<String, List<BlobKey>> blobs = blobstoreService.getUploads(request);
     List<BlobKey> blobKeys = blobs.get("image");
 
-    // User submitted form without selecting a file, so we can't get a BlobKey. (dev server)
+    // User submitted form without selecting a file, so we can't get a BlobKey. (dev
+    // server)
     if (blobKeys == null || blobKeys.isEmpty()) {
       return null;
     }
@@ -106,7 +108,8 @@ public class ImageAnalysisServlet extends HttpServlet {
     // Our form only contains a single file input, so get the first index.
     BlobKey blobKey = blobKeys.get(0);
 
-    // User submitted form without selecting a file, so the BlobKey is empty. (live server)
+    // User submitted form without selecting a file, so the BlobKey is empty. (live
+    // server)
     BlobInfo blobInfo = new BlobInfoFactory().loadBlobInfo(blobKey);
     if (blobInfo.getSize() == 0) {
       blobstoreService.delete(blobKey);
@@ -117,8 +120,8 @@ public class ImageAnalysisServlet extends HttpServlet {
   }
 
   /**
-   * Blobstore stores files as binary data. This function retrieves the binary data stored at the
-   * BlobKey parameter.
+   * Blobstore stores files as binary data. This function retrieves the binary
+   * data stored at the BlobKey parameter.
    */
   private byte[] getBlobBytes(BlobKey blobKey) throws IOException {
     BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
@@ -129,8 +132,7 @@ public class ImageAnalysisServlet extends HttpServlet {
     boolean continueReading = true;
     while (continueReading) {
       // end index is inclusive, so we have to subtract 1 to get fetchSize bytes
-      byte[] b =
-          blobstoreService.fetchData(blobKey, currentByteIndex, currentByteIndex + fetchSize - 1);
+      byte[] b = blobstoreService.fetchData(blobKey, currentByteIndex, currentByteIndex + fetchSize - 1);
       outputBytes.write(b);
 
       // if we read fewer bytes than we requested, then we reached the end
@@ -145,16 +147,15 @@ public class ImageAnalysisServlet extends HttpServlet {
   }
 
   /**
-   * Uses the Google Cloud Vision API to generate a list of labels that apply to the image
-   * represented by the binary data stored in imgBytes.
+   * Uses the Google Cloud Vision API to generate a list of labels that apply to
+   * the image represented by the binary data stored in imgBytes.
    */
   private List<EntityAnnotation> getImageLabels(byte[] imgBytes) throws IOException {
     ByteString byteString = ByteString.copyFrom(imgBytes);
     Image image = Image.newBuilder().setContent(byteString).build();
 
     Feature feature = Feature.newBuilder().setType(Feature.Type.LABEL_DETECTION).build();
-    AnnotateImageRequest request =
-        AnnotateImageRequest.newBuilder().addFeatures(feature).setImage(image).build();
+    AnnotateImageRequest request = AnnotateImageRequest.newBuilder().addFeatures(feature).setImage(image).build();
     List<AnnotateImageRequest> requests = new ArrayList<>();
     requests.add(request);
 
@@ -177,8 +178,10 @@ public class ImageAnalysisServlet extends HttpServlet {
     ImagesService imagesService = ImagesServiceFactory.getImagesService();
     ServingUrlOptions options = ServingUrlOptions.Builder.withBlobKey(blobKey);
 
-    // To support running in Google Cloud Shell with AppEngine's devserver, we must use the relative
-    // path to the image, rather than the path returned by imagesService which contains a host.
+    // To support running in Google Cloud Shell with AppEngine's devserver, we must
+    // use the relative
+    // path to the image, rather than the path returned by imagesService which
+    // contains a host.
     try {
       URL url = new URL(imagesService.getServingUrl(options));
       return url.getPath();
