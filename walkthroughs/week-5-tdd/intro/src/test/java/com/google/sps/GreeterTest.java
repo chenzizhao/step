@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     https://www.apache.org/licenses/LICENSE-2.0
+// https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,5 +29,36 @@ public final class GreeterTest {
     String greeting = greeter.greet("Ada");
 
     Assert.assertEquals("Hello Ada", greeting);
+  }
+
+  @Test
+  public void testGreetingTrimsWhitespace() {
+    Greeter greeter = new Greeter();
+
+    String greeting = greeter.greet("   Ada   ");
+
+    // Whitespace should be trimmed
+    Assert.assertEquals("Hello Ada", greeting);
+  }
+
+  @Test
+  public void testGreetingRemoveSymbols() {
+    Greeter greeter = new Greeter();
+
+    String greeting1 = greeter.greet("@Ada");
+    Assert.assertEquals("Hello Ada", greeting1);
+
+    String greeting2 = greeter.greet("A#da");
+    Assert.assertEquals("Hello Ada", greeting2);
+
+    String greeting3 = greeter.greet("Ad$a");
+    Assert.assertEquals("Hello Ada", greeting3);
+
+    String greeting4 = greeter.greet("Ada%");
+    Assert.assertEquals("Hello Ada", greeting4);
+
+    String greeting5 = greeter.greet("A@da%");
+    Assert.assertEquals("Hello Ada", greeting5);
+
   }
 }
