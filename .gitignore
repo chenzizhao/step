@@ -7,3 +7,4 @@ portfolio/.classpath
 portfolio/.factorypath
 portfolio/.project
 portfolio/.settings/
+!walkthroughs/week-5-tdd/
