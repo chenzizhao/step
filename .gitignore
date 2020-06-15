@@ -1,2 +1,9 @@
 target/
 .idea
+walkthroughs/
+*.log
+.vscode/
+portfolio/.classpath
+portfolio/.factorypath
+portfolio/.project
+portfolio/.settings/

@@ -20,8 +20,8 @@ public class LoginServlet extends HttpServlet {
     response.setContentType("application/json;");
     boolean isLoggedIn = userService.isUserLoggedIn();
     String urlToRedirect = "/";
-    String url = isLoggedIn ? 
-      userService.createLogoutURL(urlToRedirect) : userService.createLoginURL(urlToRedirect);
+    String url = isLoggedIn ? userService.createLogoutURL(urlToRedirect)
+        : userService.createLoginURL(urlToRedirect);
     UserLoginData userLoginData = new UserLoginData(isLoggedIn, url);
     response.getWriter().println(new Gson().toJson(userLoginData));
   }
