@@ -73,6 +73,7 @@ public class DataServlet extends HttpServlet {
         .map(entity -> new Comment((String) entity.getProperty("content"),
             (long) entity.getKey().getId(), (long) entity.getProperty("likeCount"),
             (String) entity.getProperty("email"),
+            // Datastore stores float numbers as double numbers
             (float) (double) entity.getProperty("sentimentScore")))
         .collect(Collectors.toList());
 
@@ -122,15 +123,16 @@ public class DataServlet extends HttpServlet {
     }
   }
 
+  /***
+   * Use Sentiment Analysis API and returns a float number between -1 and 1 as the sentiment score.
+   * The greater the score is, the more positive the msg is.
+   */
   private float getSentimentScore(String msg) throws IOException {
-    // Use Sentiment Analysis API
     Document doc = Document.newBuilder().setContent(msg).setType(Document.Type.PLAIN_TEXT).build();
     LanguageServiceClient languageService = LanguageServiceClient.create();
     Sentiment sentiment = languageService.analyzeSentiment(doc).getDocumentSentiment();
     float score = sentiment.getScore();
     languageService.close();
-    // The score is a float number between -1 and 1.
-    // The greater the score is, the more positive the msg is.
     return score;
   }
 }
