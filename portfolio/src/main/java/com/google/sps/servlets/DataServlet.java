@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     https://www.apache.org/licenses/LICENSE-2.0
+// https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -76,6 +76,7 @@ public class DataServlet extends HttpServlet {
               (long) entity.getKey().getId(),
               (long) entity.getProperty("likeCount"),
               (String) entity.getProperty("email"),
+              // Datastore stores float numbers as double numbers
               (float)(double) entity.getProperty("sentimentScore"))
           )
       .collect(Collectors.toList());
@@ -92,21 +93,21 @@ public class DataServlet extends HttpServlet {
       return;
     }
     String userEmail = userService.getCurrentUser().getEmail();
-    
+
     String newComment = request.getParameter("newComment");
-    if (newComment == null || newComment.isEmpty()){
+    if (newComment == null || newComment.isEmpty()) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Comment must be a non-empty string.");
       return;
     }
 
-    if (newComment.length() > this.MAX_CHAR_PER_COMMENT){
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST, 
-        String.format("Comment must have fewer than %d characters.", this.MAX_CHAR_PER_COMMENT));
+    if (newComment.length() > this.MAX_CHAR_PER_COMMENT) {
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+          String.format("Comment must have fewer than %d characters.", this.MAX_CHAR_PER_COMMENT));
       return;
     }
     long timestamp = System.currentTimeMillis();
     float sentimentScore = getSentimentScore(newComment);
-    
+
     Entity commentEntity = new Entity("Comment");
     commentEntity.setProperty("content", newComment);
     commentEntity.setProperty("timestamp", timestamp);
@@ -126,15 +127,14 @@ public class DataServlet extends HttpServlet {
   }
   
   private float getSentimentScore(String msg) throws IOException {
-    // Use Sentiment Analysis API
-    Document doc =
-      Document.newBuilder().setContent(msg).setType(Document.Type.PLAIN_TEXT).build();
+    // Use Sentiment Analysis API and returns a sentiment score.
+    // The score is a float number between -1 and 1.
+    // The greater the score is, the more positive the msg is.
+    Document doc = Document.newBuilder().setContent(msg).setType(Document.Type.PLAIN_TEXT).build();
     LanguageServiceClient languageService = LanguageServiceClient.create();
     Sentiment sentiment = languageService.analyzeSentiment(doc).getDocumentSentiment();
     float score = sentiment.getScore();
     languageService.close();
-    // The score is a float number between -1 and 1.
-    // The greater the score is, the more positive the msg is.
     return score;
   }
 }
