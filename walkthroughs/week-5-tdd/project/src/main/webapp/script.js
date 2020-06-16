@@ -24,9 +24,14 @@ function sendMeetingRequest() {
   // split it into an array of names
   const attendees = attendeesNamesString.split(/\s*,\s*/);
 
+  // comma-separated list of names
+  const optionalAttendeesNamesString = document.getElementById('optional-attendees').value;
+  // split it into an array of names
+  const optionalAttendees = optionalAttendeesNamesString.split(/\s*,\s*/);
+
   // Create the request to send to the server using the data we collected from
   // the web form.
-  const meetingRequest = new MeetingRequest(duration, attendees);
+  const meetingRequest = new MeetingRequest(duration, attendees, optionalAttendees);
 
   queryServer(meetingRequest).then((timeRanges) => {
     updateResultsOnPage(timeRanges);
@@ -45,7 +50,7 @@ function updateResultsOnPage(timeRanges) {
   // add results to the page
   for (const range of timeRanges) {
     resultsContainer.innerHTML += '<li>' + timeToString(range.getStartTime()) +
-        ' - ' + timeToString(range.getEndTime()) + '</li>';
+      ' - ' + timeToString(range.getEndTime()) + '</li>';
   }
 }
 
@@ -54,18 +59,18 @@ function updateResultsOnPage(timeRanges) {
  */
 function queryServer(meetingRequest) {
   const json = JSON.stringify(meetingRequest);
-  return fetch('/query', {method: 'POST', body: json})
-      .then((response) => {
-        return response.json();
-      })
-      .then((timeRanges) => {
-        // Convert the range from a json representation to our TimeRange class.
-        const out = [];
-        timeRanges.forEach((range) => {
-          out.push(new TimeRange(range.start, range.duration));
-        });
-        return out;
+  return fetch('/query', { method: 'POST', body: json })
+    .then((response) => {
+      return response.json();
+    })
+    .then((timeRanges) => {
+      // Convert the range from a json representation to our TimeRange class.
+      const out = [];
+      timeRanges.forEach((range) => {
+        out.push(new TimeRange(range.start, range.duration));
       });
+      return out;
+    });
 }
 
 /**
@@ -87,9 +92,10 @@ function timeToString(totalMinutes) {
  * Request for possible meeting times.
  */
 class MeetingRequest {
-  constructor(duration, attendees) {
+  constructor(duration, attendees, optional_attendees) {
     this.duration = duration;
     this.attendees = attendees;
+    this.optional_attendees = optional_attendees;
   }
 }
 
@@ -118,16 +124,16 @@ class TimeRange {
  * server knows about and when they are busy.
  */
 function getAllEvents() {
-  return fetch('/get-events', {method: 'GET'})
-      .then((response) => {
-        return response.json();
-      })
-      .then((events) => {
-        return events.map((event) => {
-          const time = new TimeRange(event.when.start, event.when.duration);
-          return new Event(event.title, time, event.attendees);
-        });
+  return fetch('/get-events', { method: 'GET' })
+    .then((response) => {
+      return response.json();
+    })
+    .then((events) => {
+      return events.map((event) => {
+        const time = new TimeRange(event.when.start, event.when.duration);
+        return new Event(event.title, time, event.attendees);
       });
+    });
 }
 
 /**
@@ -189,10 +195,10 @@ function initializeChart() {
  */
 function initializeChartWithEvents(container, events) {
   const dataTable = new google.visualization.DataTable();
-  dataTable.addColumn({type: 'string', id: 'Person'});
-  dataTable.addColumn({type: 'string', id: 'Title'});
-  dataTable.addColumn({type: 'date', id: 'Start'});
-  dataTable.addColumn({type: 'date', id: 'End'});
+  dataTable.addColumn({ type: 'string', id: 'Person' });
+  dataTable.addColumn({ type: 'string', id: 'Title' });
+  dataTable.addColumn({ type: 'date', id: 'Start' });
+  dataTable.addColumn({ type: 'date', id: 'End' });
 
   // Use an array so that we can have people in sorted order. It will make the
   // display much nicer to look at.
@@ -216,5 +222,5 @@ function initializeChartWithEvents(container, events) {
 
 
 // Load the chart when the doc is ready.
-google.charts.load('current', {'packages': ['timeline']});
+google.charts.load('current', { 'packages': ['timeline'] });
 google.charts.setOnLoadCallback(initializeChart);
