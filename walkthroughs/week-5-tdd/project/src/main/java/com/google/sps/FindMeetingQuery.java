@@ -37,51 +37,25 @@ public final class FindMeetingQuery {
     return ret;
   }
 
-  /* Return a list of the available TimeRanges */
-  private List<TimeRange> complement(TimeRange wholeDay, List<TimeRange> mergedTimeRanges) {
-    Stack<TimeRange> complStack = new Stack<>();
-    Stack<TimeRange> rawStack = new Stack<>();
-
-    // TimeRanges are added in the order that they are returned by mergedTimeRanges's iterator
-    // The earliest (by start time) TimeRange is on top.
-    mergedTimeRanges.sort(TimeRange.ORDER_BY_START.reversed());
-    rawStack.addAll(mergedTimeRanges);
-
-    complStack.push(wholeDay);
-    while (!rawStack.isEmpty()) {
-      TimeRange tr1 = complStack.pop();
-      TimeRange tr2 = rawStack.pop();
-      // tr1 contains or equals tr2
-      complHelper(tr1, tr2, complStack);
+  /* Return list of blocks occupied by attendees, unordered */
+  private List<TimeRange> recordOccupiedBlocks(Collection<Event> events, Collection<String> names) {
+    List<TimeRange> occupiedBlocks = new ArrayList<>();
+    for (Event event : events) {
+      if (isOccupied(event, names)) {
+        occupiedBlocks.add(event.getWhen());
+      }
     }
-    return complStack;
+    return occupiedBlocks;
   }
 
-  /* Compute the difference tr1\tr2, and push the result to the stack */
-  private void complHelper(TimeRange tr1, TimeRange tr2, Stack<TimeRange> stack) {
-    if (!tr1.contains(tr2) || tr1 == tr2) {
-      return;
-      // tr1 should contains and not equal to tr2 from now on
-    } else if (tr1.start() == tr2.start()) {
-      // |----tr1----|
-      // |--tr2--|
-      TimeRange newTr = TimeRange.fromStartEnd(tr2.end(), tr1.end(), true);
-      stack.push(newTr);
-    } else if (tr1.end() == tr2.end()) {
-      // |----tr1----|
-      //     |--tr2--|
-      TimeRange newTr = TimeRange.fromStartEnd(tr1.start(), tr2.start(), false);
-      stack.push(newTr);
-    } else {
-      // |----tr1----|
-      //   |--tr2--|
-      // tr1 contains tr2 exclusively
-      TimeRange newTr1 = TimeRange.fromStartEnd(tr1.start(), tr2.start(), false);
-      TimeRange newTr2 = TimeRange.fromStartEnd(tr2.end(), tr1.end(), false);
-      // push early gap first
-      stack.push(newTr1);
-      stack.push(newTr2);
+  /* Return true if anyone in the targetNames is involved in the event */
+  private boolean isOccupied(Event event, Collection<String> targetNames) {
+    for (String targetName : targetNames) {
+      if (event.getAttendees().contains(targetName)) {
+        return true;
+      }
     }
+    return false;
   }
 
   /* Return a list of merged TimeRanges (no overlaps) */
@@ -139,24 +113,51 @@ public final class FindMeetingQuery {
     }
   }
 
-  /* Return list of blocks occupied by attendees, unordered */
-  private List<TimeRange> recordOccupiedBlocks(Collection<Event> events, Collection<String> names) {
-    List<TimeRange> occupiedBlocks = new ArrayList<>();
-    for (Event event : events) {
-      if (isOccupied(event, names)) {
-        occupiedBlocks.add(event.getWhen());
-      }
+  /* Return a list of the available TimeRanges */
+  private List<TimeRange> complement(TimeRange wholeDay, List<TimeRange> mergedTimeRanges) {
+    Stack<TimeRange> complStack = new Stack<>();
+    Stack<TimeRange> rawStack = new Stack<>();
+
+    // TimeRanges are added in the order that they are returned by mergedTimeRanges's iterator
+    // The earliest (by start time) TimeRange is on top.
+    mergedTimeRanges.sort(TimeRange.ORDER_BY_START.reversed());
+    rawStack.addAll(mergedTimeRanges);
+
+    complStack.push(wholeDay);
+    while (!rawStack.isEmpty()) {
+      TimeRange tr1 = complStack.pop();
+      TimeRange tr2 = rawStack.pop();
+      // tr1 contains or equals tr2
+      complHelper(tr1, tr2, complStack);
     }
-    return occupiedBlocks;
+    return complStack;
   }
 
-  /* Return true if anyone in the targetNames is involved in the event */
-  private boolean isOccupied(Event event, Collection<String> targetNames) {
-    for (String targetName : targetNames) {
-      if (event.getAttendees().contains(targetName)) {
-        return true;
-      }
+  /* Compute the difference tr1\tr2, and push the result to the stack */
+  private void complHelper(TimeRange tr1, TimeRange tr2, Stack<TimeRange> stack) {
+    if (!tr1.contains(tr2) || tr1 == tr2) {
+      return;
+      // tr1 should contains and not equal to tr2 from now on
+    } else if (tr1.start() == tr2.start()) {
+      // |----tr1----|
+      // |--tr2--|
+      TimeRange newTr = TimeRange.fromStartEnd(tr2.end(), tr1.end(), true);
+      stack.push(newTr);
+    } else if (tr1.end() == tr2.end()) {
+      // |----tr1----|
+      //     |--tr2--|
+      TimeRange newTr = TimeRange.fromStartEnd(tr1.start(), tr2.start(), false);
+      stack.push(newTr);
+    } else {
+      // |----tr1----|
+      //   |--tr2--|
+      // tr1 contains tr2 exclusively
+      TimeRange newTr1 = TimeRange.fromStartEnd(tr1.start(), tr2.start(), false);
+      TimeRange newTr2 = TimeRange.fromStartEnd(tr2.end(), tr1.end(), false);
+      // push early gap first
+      stack.push(newTr1);
+      stack.push(newTr2);
     }
-    return false;
   }
+
 }
