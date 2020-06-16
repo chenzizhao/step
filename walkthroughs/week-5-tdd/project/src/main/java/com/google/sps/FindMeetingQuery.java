@@ -63,12 +63,12 @@ public final class FindMeetingQuery {
       TimeRange newTr = TimeRange.fromStartEnd(tr2.end(), tr1.end(), true);
       stack.push(newTr);
     } else if (tr1.end() == tr2.end()) {
-      TimeRange newTr = TimeRange.fromStartEnd(tr1.start(), tr2.start(), true);
+      TimeRange newTr = TimeRange.fromStartEnd(tr1.start(), tr2.start(), false);
       stack.push(newTr);
     } else {
       // tr1 contains tr2 exclusively
-      TimeRange newTr1 = TimeRange.fromStartEnd(tr1.start(), tr2.start(), true);
-      TimeRange newTr2 = TimeRange.fromStartEnd(tr2.end(), tr1.end(), true);
+      TimeRange newTr1 = TimeRange.fromStartEnd(tr1.start(), tr2.start(), false);
+      TimeRange newTr2 = TimeRange.fromStartEnd(tr2.end(), tr1.end(), false);
       // push early gap first
       stack.push(newTr1);
       stack.push(newTr2);
@@ -105,7 +105,7 @@ public final class FindMeetingQuery {
       stack.push(tr2);
     } else if (tr1.end() >= tr2.start()) {
       // merge two blocks
-      TimeRange newTr = TimeRange.fromStartEnd(tr1.start(), tr2.end(), true);
+      TimeRange newTr = TimeRange.fromStartEnd(tr1.start(), tr2.end(), false);
       stack.push(newTr);
     } else {
       // push the earlier block first
