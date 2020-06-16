@@ -14,9 +14,11 @@
 
 package com.google.sps;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Stack;
 
-@SuppressWarnings("UnnecessaryReturnStatement")
 public final class FindMeetingQuery {
 
   public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
@@ -28,11 +30,8 @@ public final class FindMeetingQuery {
       return ret;
     }
     List<TimeRange> occupiedBlocks = recordOccupiedBlocks(events, request.getAttendees());
-    // Now we need to join all blocked time ranges
     List<TimeRange> merged = union(occupiedBlocks);
-    // Then take the complement
     ret = complement(TimeRange.WHOLE_DAY, merged);
-    // Lastly remove time ranges that are too short
     ret.removeIf(tr -> tr.duration() < request.getDuration());
     return ret;
   }
