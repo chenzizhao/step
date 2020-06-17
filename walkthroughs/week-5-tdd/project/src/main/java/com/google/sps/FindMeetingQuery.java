@@ -30,8 +30,7 @@ public final class FindMeetingQuery {
       return ret;
     }
     List<TimeRange> occupiedBlocks = recordOccupiedBlocks(events, request.getAttendees());
-    List<TimeRange> merged = union(occupiedBlocks);
-    ret = complement(TimeRange.WHOLE_DAY, merged);
+    ret = complement(TimeRange.WHOLE_DAY, occupiedBlocks);
     ret.removeIf(tr -> tr.duration() < request.getDuration());
     return ret;
   }
@@ -57,61 +56,6 @@ public final class FindMeetingQuery {
     return false;
   }
 
-  /* Return a list of merged TimeRanges (no overlaps) */
-  private List<TimeRange> union(List<TimeRange> timeRanges) {
-    if (timeRanges.size() == 0 || timeRanges.size() == 1) {
-      return timeRanges;
-    }
-
-    Stack<TimeRange> unionStack = new Stack<>();
-    Stack<TimeRange> rawStack = new Stack<>();
-
-    // TimeRanges are added in the order that they are returned by timeRanges' iterator
-    // The earliest (by start time) TimeRange is on top.
-    timeRanges.sort(TimeRange.ORDER_BY_START.reversed());
-    rawStack.addAll(timeRanges);
-
-    unionStack.push(rawStack.pop());
-    while (!rawStack.isEmpty()) {
-      TimeRange tr1 = unionStack.pop();
-      TimeRange tr2 = rawStack.pop();
-      // tr1 is at least as early as tr2
-      unionHelper(tr1, tr2, unionStack);
-    }
-    return unionStack;
-  }
-
-  /* Union tr1 and tr2 and push the result to stack */
-  private void unionHelper(TimeRange tr1, TimeRange tr2, Stack<TimeRange> stack) {
-    // tr1 is at least as early as tr2
-    if (tr1 == tr2) {
-      //|--tr1--|
-      //|--tr2--|
-      stack.push(tr1);
-    } else if (tr1.contains(tr2)) {
-      //|----tr1----|
-      // |--tr2--|
-      stack.push(tr1);
-    } else if (tr2.contains(tr1)) {
-      //|--tr1--|
-      //|----tr2----|
-      stack.push(tr2);
-    } else if (tr1.end() >= tr2.start()) {
-      //|--tr1--|
-      //      |--tr2--|
-      //        |--tr2--|
-      // merge two blocks
-      TimeRange newTr = TimeRange.fromStartEnd(tr1.start(), tr2.end(), false);
-      stack.push(newTr);
-    } else {
-      //|--tr1--|
-      //          |--tr2--|
-      // push the early block first
-      stack.push(tr1);
-      stack.push(tr2);
-    }
-  }
-
   /* Return a list of the available TimeRanges */
   private List<TimeRange> complement(TimeRange wholeDay, List<TimeRange> mergedTimeRanges) {
     Stack<TimeRange> complStack = new Stack<>();
@@ -126,7 +70,7 @@ public final class FindMeetingQuery {
     while (!rawStack.isEmpty()) {
       TimeRange tr1 = complStack.pop();
       TimeRange tr2 = rawStack.pop();
-      // tr1 contains or equals tr2
+      // tr2.end()<=tr1.end()
       complHelper(tr1, tr2, complStack);
     }
     return complStack;
@@ -134,23 +78,22 @@ public final class FindMeetingQuery {
 
   /* Compute the difference tr1\tr2, and push the result to the stack */
   private void complHelper(TimeRange tr1, TimeRange tr2, Stack<TimeRange> stack) {
-    if (!tr1.contains(tr2) || tr1 == tr2) {
+    // tr2.end()<=tr1.end() guaranteed
+    if (tr1 == tr2) {
       return;
-      // tr1 should contains and not equal to tr2 from now on
-    } else if (tr1.start() == tr2.start()) {
-      // |----tr1----|
+    } else if (!tr1.overlaps(tr2)) {
+      //          |--tr1--|
       // |--tr2--|
-      TimeRange newTr = TimeRange.fromStartEnd(tr2.end(), tr1.end(), true);
-      stack.push(newTr);
-    } else if (tr1.end() == tr2.end()) {
-      // |----tr1----|
-      //     |--tr2--|
-      TimeRange newTr = TimeRange.fromStartEnd(tr1.start(), tr2.start(), false);
+      stack.push(tr1);
+    } else if (!tr1.contains(tr2)) {
+      //    |--tr1--|
+      // |--tr2--|
+      TimeRange newTr = TimeRange.fromStartEnd(tr2.end(), tr1.end(), false);
       stack.push(newTr);
     } else {
       // |----tr1----|
       //   |--tr2--|
-      // tr1 contains tr2 exclusively
+      // tr1 contains tr2
       TimeRange newTr1 = TimeRange.fromStartEnd(tr1.start(), tr2.start(), false);
       TimeRange newTr2 = TimeRange.fromStartEnd(tr2.end(), tr1.end(), false);
       // push early gap first
