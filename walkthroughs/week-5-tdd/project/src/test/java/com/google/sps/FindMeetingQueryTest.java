@@ -126,8 +126,10 @@ public final class FindMeetingQueryTest {
 
   @Test
   public void everyAttendeeIsConsideredOptionalBusy() {
-    // Have each person have different events. We should see two options because each person has
+    // Have each person have different events. We should see three options because each person has
     // split the restricted times.
+    // If we consider the optional attendee, no slots will be available.
+    // So we ignore the optional attendee.
     //
     // Events  :       |--A--|     |--B--|
     // Optional: |-------------C---------------|
