@@ -30,7 +30,7 @@ public final class FindMeetingQuery {
       return ret;
     }
     List<TimeRange> occupiedBlocks = recordOccupiedBlocks(events, request.getAttendees());
-    ret = complement(TimeRange.WHOLE_DAY, occupiedBlocks);
+    ret = complement(occupiedBlocks);
     ret.removeIf(tr -> tr.duration() < request.getDuration());
     return ret;
   }
@@ -57,7 +57,7 @@ public final class FindMeetingQuery {
   }
 
   /* Return a list of the available TimeRanges */
-  private List<TimeRange> complement(TimeRange wholeDay, List<TimeRange> mergedTimeRanges) {
+  private List<TimeRange> complement(List<TimeRange> mergedTimeRanges) {
     Stack<TimeRange> complStack = new Stack<>();
     Stack<TimeRange> rawStack = new Stack<>();
 
@@ -66,7 +66,7 @@ public final class FindMeetingQuery {
     mergedTimeRanges.sort(TimeRange.ORDER_BY_START.reversed());
     rawStack.addAll(mergedTimeRanges);
 
-    complStack.push(wholeDay);
+    complStack.push(TimeRange.WHOLE_DAY);
     while (!rawStack.isEmpty()) {
       TimeRange tr1 = complStack.pop();
       TimeRange tr2 = rawStack.pop();
