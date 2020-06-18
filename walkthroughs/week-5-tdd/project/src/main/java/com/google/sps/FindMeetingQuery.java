@@ -30,7 +30,7 @@ public final class FindMeetingQuery {
       return ret;
     }
     List<TimeRange> occupiedBlocks = recordOccupiedBlocks(events, request.getAttendees());
-    ret = complement(occupiedBlocks);
+    ret = getAvailableTimes(occupiedBlocks);
     ret.removeIf(tr -> tr.duration() < request.getDuration());
     return ret;
   }
@@ -56,51 +56,50 @@ public final class FindMeetingQuery {
     return false;
   }
 
-  /* Remove occupied timeRanges from the a whole day period, by iteratively computing
+  /* Remove occupied occupiedTimeRanges from the a whole day period, by iteratively computing
    * the difference between the latest available timeRange and the earliest occupied timeRange. */
-  private List<TimeRange> complement(List<TimeRange> timeRanges) {
-    Stack<TimeRange> complementStack = new Stack<>();
+  private List<TimeRange> getAvailableTimes(List<TimeRange> occupiedTimeRanges) {
+    Stack<TimeRange> availableStack = new Stack<>();
     Stack<TimeRange> occupiedStack = new Stack<>();
 
-    // TimeRanges are added in the order that they are returned by timeRanges' iterator
     // The earliest (by start time) TimeRange is on the top of occupiedStack
-    timeRanges.sort(TimeRange.ORDER_BY_START.reversed());
-    occupiedStack.addAll(timeRanges);
+    occupiedStack.addAll(occupiedTimeRanges);
+    occupiedStack.sort(TimeRange.ORDER_BY_START.reversed());
 
-    complementStack.push(TimeRange.WHOLE_DAY);
+    availableStack.push(TimeRange.WHOLE_DAY);
     while (!occupiedStack.isEmpty()) {
-      TimeRange tr1 = complementStack.pop();
-      TimeRange tr2 = occupiedStack.pop();
-      // tr2.end()<=tr1.end()
-      complHelper(tr1, tr2, complementStack);
+      TimeRange latestAvailableTimeRange = availableStack.pop();
+      if (latestAvailableTimeRange.duration()<=0){ break; }
+      TimeRange earliestOccupiedTimeRange = occupiedStack.pop();
+      availableStack.addAll(getTimeRangeDifference(latestAvailableTimeRange, earliestOccupiedTimeRange));
     }
-    return complementStack;
+    return availableStack;
   }
 
-  /* Compute the difference tr1\tr2, and push the result to the stack */
-  private void complHelper(TimeRange tr1, TimeRange tr2, Stack<TimeRange> stack) {
-    // tr2.end()<=tr1.end() guaranteed
-    if (tr1 == tr2) {
-      return;
-    } else if (!tr1.overlaps(tr2)) {
-      //          |--tr1--|
-      // |--tr2--|
-      stack.push(tr1);
-    } else if (!tr1.contains(tr2)) {
-      //    |--tr1--|
-      // |--tr2--|
-      TimeRange newTr = TimeRange.fromStartEnd(tr2.end(), tr1.end(), false);
-      stack.push(newTr);
-    } else {
-      // |----tr1----|
-      //   |--tr2--|
-      // tr1 contains tr2
-      TimeRange newTr1 = TimeRange.fromStartEnd(tr1.start(), tr2.start(), false);
-      TimeRange newTr2 = TimeRange.fromStartEnd(tr2.end(), tr1.end(), false);
-      // push early gap first
-      stack.push(newTr1);
-      stack.push(newTr2);
+  /* Compute and return the difference tr1\tr2
+  *  Returns a zero length TimeRange if */
+  private List<TimeRange> getTimeRangeDifference(TimeRange availableTimeRange, TimeRange occupiedTimeRange) {
+    List<TimeRange> ret = new ArrayList<>();
+    if (occupiedTimeRange.start()<=availableTimeRange.start()){
+      //                 |--available---| <--END_OF_DAY
+      // |--occupied--|
+      // |---occupied----|
+      // |-----occupied------|
+      // |----------occupied------------|
+      //                 |--occupied--|
+      //                 |--occupied----|
+      TimeRange newTr = TimeRange.fromStartEnd(
+              Math.max(availableTimeRange.start(), occupiedTimeRange.end()), TimeRange.END_OF_DAY, true);
+      ret.add(newTr);
+      return ret;
     }
+
+    // |---------available-----------| <--END_OF_DAY
+    //        |--occupied--|
+    //        |-------occupied-------|
+    ret.add(TimeRange.fromStartEnd(availableTimeRange.start(), occupiedTimeRange.start(), false));
+    ret.add(TimeRange.fromStartEnd(occupiedTimeRange.end(), TimeRange.END_OF_DAY, true));
+    return ret;
   }
 
 }
