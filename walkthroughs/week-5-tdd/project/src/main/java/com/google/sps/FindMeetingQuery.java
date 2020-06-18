@@ -56,24 +56,25 @@ public final class FindMeetingQuery {
     return false;
   }
 
-  /* Return a list of the available TimeRanges */
-  private List<TimeRange> complement(List<TimeRange> mergedTimeRanges) {
-    Stack<TimeRange> complStack = new Stack<>();
-    Stack<TimeRange> rawStack = new Stack<>();
+  /* Remove occupied timeRanges from the a whole day period, by iteratively computing
+   * the difference between the latest available timeRange and the earliest occupied timeRange. */
+  private List<TimeRange> complement(List<TimeRange> timeRanges) {
+    Stack<TimeRange> complementStack = new Stack<>();
+    Stack<TimeRange> occupiedStack = new Stack<>();
 
-    // TimeRanges are added in the order that they are returned by mergedTimeRanges's iterator
-    // The earliest (by start time) TimeRange is on top.
-    mergedTimeRanges.sort(TimeRange.ORDER_BY_START.reversed());
-    rawStack.addAll(mergedTimeRanges);
+    // TimeRanges are added in the order that they are returned by timeRanges' iterator
+    // The earliest (by start time) TimeRange is on the top of occupiedStack
+    timeRanges.sort(TimeRange.ORDER_BY_START.reversed());
+    occupiedStack.addAll(timeRanges);
 
-    complStack.push(TimeRange.WHOLE_DAY);
-    while (!rawStack.isEmpty()) {
-      TimeRange tr1 = complStack.pop();
-      TimeRange tr2 = rawStack.pop();
+    complementStack.push(TimeRange.WHOLE_DAY);
+    while (!occupiedStack.isEmpty()) {
+      TimeRange tr1 = complementStack.pop();
+      TimeRange tr2 = occupiedStack.pop();
       // tr2.end()<=tr1.end()
-      complHelper(tr1, tr2, complStack);
+      complHelper(tr1, tr2, complementStack);
     }
-    return complStack;
+    return complementStack;
   }
 
   /* Compute the difference tr1\tr2, and push the result to the stack */
