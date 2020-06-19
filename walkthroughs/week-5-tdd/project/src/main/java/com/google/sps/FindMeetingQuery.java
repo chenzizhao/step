@@ -29,16 +29,19 @@ public final class FindMeetingQuery {
     if (request.getDuration() > TimeRange.WHOLE_DAY.duration()) {
       return ret;
     }
-    List<TimeRange> occupiedMandatory = getOccupiedBlocks(events, request.getAttendees());
+
     List<String> allAttendees = new ArrayList<>(request.getAttendees());
     allAttendees.addAll(request.getOptionalAttendees());
+
     List<TimeRange> occupiedAll = getOccupiedBlocks(events, allAttendees);
-    ret = complement(TimeRange.WHOLE_DAY, occupiedAll);
+    ret = getAvailableTimes(occupiedAll);
     ret.removeIf(timeRange -> timeRange.duration() < request.getDuration());
     if (ret.size() > 0 || request.getAttendees().size() == 0) {
       return ret;
     }
-    ret = complement(TimeRange.WHOLE_DAY, occupiedMandatory);
+
+    List<TimeRange> occupiedMandatory = getOccupiedBlocks(events, request.getAttendees());
+    ret = getAvailableTimes(occupiedMandatory);
     ret.removeIf(timeRange -> timeRange.duration() < request.getDuration());
     return ret;
   }
@@ -64,50 +67,50 @@ public final class FindMeetingQuery {
     return false;
   }
 
-  /* Return a list of the available TimeRanges */
-  private List<TimeRange> complement(TimeRange wholeDay, List<TimeRange> mergedTimeRanges) {
-    Stack<TimeRange> complStack = new Stack<>();
-    Stack<TimeRange> rawStack = new Stack<>();
+  /* Remove occupied occupiedTimeRanges from the a whole day period, by iteratively computing
+   * the difference between the latest available timeRange and the earliest occupied timeRange. */
+  private List<TimeRange> getAvailableTimes(List<TimeRange> occupiedTimeRanges) {
+    Stack<TimeRange> availableStack = new Stack<>();
+    Stack<TimeRange> occupiedStack = new Stack<>();
 
-    // TimeRanges are added in the order that they are returned by mergedTimeRanges's iterator
-    // The earliest (by start time) TimeRange is on top.
-    mergedTimeRanges.sort(TimeRange.ORDER_BY_START.reversed());
-    rawStack.addAll(mergedTimeRanges);
+    // The earliest (by start time) TimeRange is on the top of occupiedStack
+    occupiedStack.addAll(occupiedTimeRanges);
+    occupiedStack.sort(TimeRange.ORDER_BY_START.reversed());
 
-    complStack.push(wholeDay);
-    while (!rawStack.isEmpty()) {
-      TimeRange tr1 = complStack.pop();
-      TimeRange tr2 = rawStack.pop();
-      // tr2.end()<=tr1.end()
-      complHelper(tr1, tr2, complStack);
+    availableStack.push(TimeRange.WHOLE_DAY);
+    while (!occupiedStack.isEmpty()) {
+      TimeRange latestAvailableTimeRange = availableStack.pop();
+      if (latestAvailableTimeRange.duration()<=0){ break; }
+      TimeRange earliestOccupiedTimeRange = occupiedStack.pop();
+      availableStack.addAll(getTimeRangeDifference(latestAvailableTimeRange, earliestOccupiedTimeRange));
     }
-    return complStack;
+    return availableStack;
   }
 
-  /* Compute the difference tr1\tr2, and push the result to the stack */
-  private void complHelper(TimeRange tr1, TimeRange tr2, Stack<TimeRange> stack) {
-    // tr2.end()<=tr1.end() guaranteed
-    if (tr1 == tr2) {
-      return;
-    } else if (!tr1.overlaps(tr2)) {
-      //          |--tr1--|
-      // |--tr2--|
-      stack.push(tr1);
-    } else if (!tr1.contains(tr2)) {
-      //    |--tr1--|
-      // |--tr2--|
-      TimeRange newTr = TimeRange.fromStartEnd(tr2.end(), tr1.end(), false);
-      stack.push(newTr);
-    } else {
-      // |----tr1----|
-      //   |--tr2--|
-      // tr1 contains tr2
-      TimeRange newTr1 = TimeRange.fromStartEnd(tr1.start(), tr2.start(), false);
-      TimeRange newTr2 = TimeRange.fromStartEnd(tr2.end(), tr1.end(), false);
-      // push early gap first
-      stack.push(newTr1);
-      stack.push(newTr2);
+  /* Compute and return the difference tr1\tr2
+  *  Returns a zero length TimeRange if */
+  private List<TimeRange> getTimeRangeDifference(TimeRange availableTimeRange, TimeRange occupiedTimeRange) {
+    List<TimeRange> ret = new ArrayList<>();
+    if (occupiedTimeRange.start()<=availableTimeRange.start()){
+      //                 |--available---| <--END_OF_DAY
+      // |--occupied--|
+      // |---occupied----|
+      // |-----occupied------|
+      // |----------occupied------------|
+      //                 |--occupied--|
+      //                 |--occupied----|
+      TimeRange newTr = TimeRange.fromStartEnd(
+              Math.max(availableTimeRange.start(), occupiedTimeRange.end()), TimeRange.END_OF_DAY, true);
+      ret.add(newTr);
+      return ret;
     }
+
+    // |---------available-----------| <--END_OF_DAY
+    //        |--occupied--|
+    //        |-------occupied-------|
+    ret.add(TimeRange.fromStartEnd(availableTimeRange.start(), occupiedTimeRange.start(), false));
+    ret.add(TimeRange.fromStartEnd(occupiedTimeRange.end(), TimeRange.END_OF_DAY, true));
+    return ret;
   }
 
 }
