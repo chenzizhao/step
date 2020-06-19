@@ -29,14 +29,22 @@ public final class FindMeetingQuery {
     if (request.getDuration() > TimeRange.WHOLE_DAY.duration()) {
       return ret;
     }
-    List<TimeRange> occupiedBlocks = recordOccupiedBlocks(events, request.getAttendees());
-    ret = complement(TimeRange.WHOLE_DAY, occupiedBlocks);
-    ret.removeIf(tr -> tr.duration() < request.getDuration());
+    List<TimeRange> occupiedMandatory = getOccupiedBlocks(events, request.getAttendees());
+    List<String> allAttendees = new ArrayList<>(request.getAttendees());
+    allAttendees.addAll(request.getOptionalAttendees());
+    List<TimeRange> occupiedAll = getOccupiedBlocks(events, allAttendees);
+    ret = complement(TimeRange.WHOLE_DAY, occupiedAll);
+    ret.removeIf(timeRange -> timeRange.duration() < request.getDuration());
+    if (ret.size() > 0 || request.getAttendees().size() == 0) {
+      return ret;
+    }
+    ret = complement(TimeRange.WHOLE_DAY, occupiedMandatory);
+    ret.removeIf(timeRange -> timeRange.duration() < request.getDuration());
     return ret;
   }
 
   /* Return list of blocks occupied by attendees, unordered */
-  private List<TimeRange> recordOccupiedBlocks(Collection<Event> events, Collection<String> names) {
+  private List<TimeRange> getOccupiedBlocks(Collection<Event> events, Collection<String> names) {
     List<TimeRange> occupiedBlocks = new ArrayList<>();
     for (Event event : events) {
       if (isOccupied(event, names)) {
